@@ -1,0 +1,68 @@
+﻿@page
+@model Ec2Manager.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "AwsInstances";
+}
+
+<h2>AwsInstances</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Instances[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Instances[0].AccountName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Instances[0].Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Instances[0].IpAddress)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Instances[0].Id)
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Instances)
+        {
+            <tr>
+                <td>
+                    <img src="@Url.Content(item.StatusImage)" alt="statusimage" />
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AccountName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IpAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @{ if (item.Status.Equals("Stopped", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            @*@Html.ActionLink("Enable", "Enabler", "Enable", new { item.Id }, new { @class = "btn btn-info" })*@
+                            <a asp-page="./Enable" asp-route-id="@item.AccountName+@item.Id">Enable</a>
+
+                        } }
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
