@@ -11,13 +11,13 @@ namespace Ec2Manager.Pages
     {
         private readonly IOptions<AppConfig> config;
 
-        internal EnableModel(IOptions<AppConfig> config)
+        public EnableModel(IOptions<AppConfig> config)
         {
             this.config = config;
         }
 
         [BindProperty]
-        internal AwsEc2Instance Instance { get; set; }
+        public AwsEc2Instance Instance { get; set; }
 
         public async Task<IActionResult> OnGet(string Id)
         {
