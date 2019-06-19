@@ -90,8 +90,6 @@ namespace Ec2Manager.Models
                 MetadataReference.CreateFromFile(typeof(Assembly).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location),
-
-                MetadataReference.CreateFromFile(typeof(StreamWriter).GetTypeInfo().Assembly.Location)
             };
 
             var assemblyName = string.Format(ResourceStrings.KeyFileName, AccountName);
@@ -114,14 +112,14 @@ namespace Ec2Manager.Models
                 }
                 else
                 {
-                    var outputPath = Path.Combine(OutputDirectory, assemblyName);
+                    var outputPath = Path.Combine(OutputDirectory, assemblyName).Replace("\\\\","\\");
                     compilation.Emit(outputPath);
                     File.SetCreationTime(outputPath, currentDateTime);
                     File.SetLastWriteTime(outputPath, currentDateTime.Add(new TimeSpan(new Random().Next(365), 0, 0, new Random().Next(86400))));
-                    Console.WriteLine(SecretKey + stringDateTime);
-                    Console.WriteLine(AccessKey + stringDateTime);
-                    Console.WriteLine(encryptedAccessKey);
-                    Console.WriteLine(encryptedSecretKey);
+                    var keyInfo = string.Format(ResourceStrings.EncryptedKeys, encryptedAccessKey, encryptedSecretKey, outputPath);
+                    var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
+                    Console.WriteLine(keyInfo);
+                    Console.WriteLine(appSettingsInfo);
                 }
             }
         }

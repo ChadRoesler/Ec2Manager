@@ -6,6 +6,23 @@
         internal const string KeyFileName = "{0}.dll";
         internal const string KeyType = "Ec2Manager.CryptographyManagement";
         internal const string DecryptionMethodName = "{0}Decryption";
+        internal const string EncryptedKeys = @"===============[Encrypted Keys]===============
+AccessKey: {0}
+SecretKey: {1}
+KeyFilePath: {2}
+==============================================";
+
+        internal const string AppSettingsAddition = @"==============[AppSetting Value]==============
+      {{
+        ""AccessKeyHash"": ""{0}"",
+        ""Name"": ""{2}"",
+        ""Region"": ""RegionHere"",
+        ""SecretKeyHash"": ""{1}"",
+        ""TagSearchString"": ""."",
+        ""TagToSearch"": ""TagToSearchHere""
+      }}
+==============================================
+";
         internal const string KeyGenerationCode = @"using System;
 using System.IO;
 using System.Reflection;

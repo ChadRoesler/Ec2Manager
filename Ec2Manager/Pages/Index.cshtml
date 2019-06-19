@@ -2,10 +2,22 @@
 @model Ec2Manager.Pages.IndexModel
 
 @{
-    ViewData["Title"] = "AwsInstances";
+    ViewData["Title"] = "Instances";
 }
 
 <h2>AwsInstances</h2>
+
+<form asp-page="./Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by
+            <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-page="./Index">Back to full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
@@ -13,13 +25,19 @@
 
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Instances[0].Name)
+                <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort">
+                   @*asp-route-currentFilter="@Model.CurrentFilter">*@
+                    @Html.DisplayNameFor(model => model.Instances[0].Name)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Instances[0].AccountName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Instances[0].Status)
+                <a asp-page="./Index" asp-route-sortOrder="@Model.StatusSort">
+                   @*asp-route-currentFilter="@Model.CurrentFilter">*@
+                    @Html.DisplayNameFor(model => model.Instances[0].Status)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Instances[0].IpAddress)
@@ -56,9 +74,7 @@
                 <td>
                     @{ if (item.Status.Equals("Stopped", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            @*@Html.ActionLink("Enable", "Enabler", "Enable", new { item.Id }, new { @class = "btn btn-info" })*@
-                            <a asp-page="./Enable" asp-route-id="@item.AccountName+@item.Id">Enable</a>
-
+                            <a asp-page="./Enable" asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
                         } }
                 </td>
             </tr>
@@ -66,3 +82,24 @@
 
     </tbody>
 </table>
+@*
+@{
+    var prevDisabled = !Model.Instances.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Instances.HasNextPage ? "disabled" : "";
+}
+
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurrentSort"
+   asp-route-pageIndex="@(Model.Instances.PageIndex - 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurrentSort"
+   asp-route-pageIndex="@(Model.Instances.PageIndex + 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
+*@
