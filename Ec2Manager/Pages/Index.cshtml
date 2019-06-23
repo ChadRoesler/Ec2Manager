@@ -5,12 +5,33 @@
     ViewData["Title"] = "Instances";
 }
 
+@{
+    List<SelectListItem> listItems = new List<SelectListItem>();
+    listItems.Add(new SelectListItem
+    {
+        Text = "Name",
+        Value = "Name"
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "Status",
+        Value = "Status",
+        Selected = true
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "Account",
+        Value = "Account"
+    });
+}
+
 <h2>AwsInstances</h2>
 
 <form asp-page="./Index" method="get">
     <div class="form-actions no-color">
         <p>
             Find by
+            @Html.DropDownListFor(model => model.CurrentSearchType, listItems, "--Search Type--")
             <input type="text" name="SearchString" value="@Model.CurrentFilter" />
             <input type="submit" value="Search" class="btn btn-default" /> |
             <a asp-page="./Index">Back to full List</a>
@@ -25,8 +46,8 @@
 
             </th>
             <th>
-                <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort">
-                   @*asp-route-currentFilter="@Model.CurrentFilter">*@
+                <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort"
+                   asp-route-currentFilter="@Model.CurrentFilter">
                     @Html.DisplayNameFor(model => model.Instances[0].Name)
                 </a>
             </th>
@@ -34,8 +55,8 @@
                 @Html.DisplayNameFor(model => model.Instances[0].AccountName)
             </th>
             <th>
-                <a asp-page="./Index" asp-route-sortOrder="@Model.StatusSort">
-                   @*asp-route-currentFilter="@Model.CurrentFilter">*@
+                <a asp-page="./Index" asp-route-sortOrder="@Model.StatusSort"
+                   asp-route-currentFilter="@Model.CurrentFilter">
                     @Html.DisplayNameFor(model => model.Instances[0].Status)
                 </a>
             </th>
@@ -74,7 +95,7 @@
                 <td>
                     @{ if (item.Status.Equals("Stopped", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            <a asp-page="./Enable" asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-page="./Enable" asp- asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
                         } }
                 </td>
             </tr>
@@ -82,7 +103,7 @@
 
     </tbody>
 </table>
-@*
+
 @{
     var prevDisabled = !Model.Instances.HasPreviousPage ? "disabled" : "";
     var nextDisabled = !Model.Instances.HasNextPage ? "disabled" : "";
@@ -102,4 +123,3 @@
    class="btn btn-default @nextDisabled">
     Next
 </a>
-*@

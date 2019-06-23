@@ -35,10 +35,10 @@ namespace Ec2Manager.Models
             return base.PreGuiExec(arguments, passable);
         }
 
-        public override void GuiMain(string[] arguments, object passableObkect)
+        public override void GuiMain(string[] arguments, object passableObject)
         {
-            ((IWebHost)passableObkect).Run();
-            base.GuiMain(arguments, passableObkect);
+            ((IWebHost)passableObject).Run();
+            base.GuiMain(arguments, passableObject);
         }
     }
 }
