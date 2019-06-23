@@ -4,14 +4,14 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <UserSecretsId>df526939-afb4-4cf8-a5a1-4cbda31b982d</UserSecretsId>
     <Authors>Chad Roesler</Authors>
-    <Version>1.0.1</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.3.102.3" />
-    <PackageReference Include="AWSSDK.EC2" Version="3.3.114" />
+    <PackageReference Include="AWSSDK.Core" Version="3.3.103" />
+    <PackageReference Include="AWSSDK.EC2" Version="3.3.117.2" />
     <PackageReference Include="CommandLineParser" Version="2.5.0" />
-    <PackageReference Include="HybridScaffolding" Version="1.0.13" />
+    <PackageReference Include="HybridScaffolding" Version="1.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
