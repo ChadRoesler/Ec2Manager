@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Amazon;
 using Ec2Manager.Constants;
+using HybridScaffolding.Enums;
 
 namespace Ec2Manager.Models
 {
@@ -36,7 +37,7 @@ namespace Ec2Manager.Models
         internal string TagSearchString { get; set; }
         internal RegionEndpoint Region {get; set; }
 
-        internal void EncryptKeys(string OutputDirectory)
+        internal void EncryptKeys(string OutputDirectory, RunTypes RunType)
         {
 
             var keyByteString = string.Empty;
@@ -118,8 +119,16 @@ namespace Ec2Manager.Models
                     File.SetLastWriteTime(outputPath, currentDateTime.Add(new TimeSpan(new Random().Next(365), 0, 0, new Random().Next(86400))));
                     var keyInfo = string.Format(ResourceStrings.EncryptedKeys, encryptedAccessKey, encryptedSecretKey, outputPath);
                     var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
-                    Console.WriteLine(keyInfo);
-                    Console.WriteLine(appSettingsInfo);
+                    var appsettingsPowershellInfo = string.Format(ResourceStrings.AppSettingsPowershellAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
+                    if (RunType == RunTypes.Powershell)
+                    {
+                        Console.WriteLine(appsettingsPowershellInfo);
+                    }
+                    else
+                    {
+                        Console.WriteLine(keyInfo);
+                        Console.WriteLine(appSettingsInfo);
+                    }
                 }
             }
         }

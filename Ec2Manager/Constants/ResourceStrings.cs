@@ -11,7 +11,6 @@ AccessKey: {0}
 SecretKey: {1}
 KeyFilePath: {2}
 ==============================================";
-
         internal const string AppSettingsAddition = @"==============[AppSetting Value]==============
       {{
         ""AccessKeyHash"": ""{0}"",
@@ -22,6 +21,15 @@ KeyFilePath: {2}
         ""TagToSearch"": ""TagToSearchHere""
       }}
 ==============================================
+";
+        internal const string AppSettingsPowershellAddition = @"{{
+    ""AccessKeyHash"": ""{0}"",
+    ""Name"": ""{2}"",
+    ""Region"": ""RegionHere"",
+    ""SecretKeyHash"": ""{1}"",
+    ""TagSearchString"": ""."",
+    ""TagToSearch"": ""TagToSearchHere""
+}}
 ";
         internal const string KeyGenerationCode = @"using System;
 using System.IO;

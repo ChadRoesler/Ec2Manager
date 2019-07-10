@@ -20,7 +20,7 @@ namespace Ec2Manager.Models
             var result = Parser.Default.ParseArguments<EncryptCommand>(arguments)
                 .WithParsed((EncryptCommand encrypt) => {
                     var keyToMake = new AwsKey(encrypt.AccessKey, encrypt.SecretKey, encrypt.AccountName);
-                    keyToMake.EncryptKeys(encrypt.OutputDirectory);
+                    keyToMake.EncryptKeys(encrypt.OutputDirectory, runType);
                 });
                 //.WithNotParsed((errs) => { errs.Dump(); });
 
