@@ -8,8 +8,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Amazon;
-using Ec2Manager.Constants;
 using HybridScaffolding.Enums;
+using Ec2Manager.Constants;
 
 namespace Ec2Manager.Models
 {
@@ -35,7 +35,7 @@ namespace Ec2Manager.Models
         internal string AccountName { get; set; }
         internal string Tag { get; set; }
         internal string TagSearchString { get; set; }
-        internal RegionEndpoint Region {get; set; }
+        internal RegionEndpoint Region { get; set; }
 
         internal void EncryptKeys(string OutputDirectory, RunTypes RunType)
         {
@@ -104,29 +104,28 @@ namespace Ec2Manager.Models
                 {
                     IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
                         diagnostic.Severity == DiagnosticSeverity.Error);
-                    Console.WriteLine("FAIL");
                     foreach (Diagnostic diagnostic in failures)
                     {
-                       
                         Console.Error.WriteLine("\t{0}: {1}", diagnostic.Id, diagnostic.GetMessage());
                     }
                 }
                 else
                 {
-                    var outputPath = Path.Combine(OutputDirectory, assemblyName).Replace("\\\\","\\");
+                    var outputPath = Path.Combine(OutputDirectory, assemblyName).Replace("\\\\", "\\");
                     compilation.Emit(outputPath);
                     File.SetCreationTime(outputPath, currentDateTime);
                     File.SetLastWriteTime(outputPath, currentDateTime.Add(new TimeSpan(new Random().Next(365), 0, 0, new Random().Next(86400))));
                     var keyInfo = string.Format(ResourceStrings.EncryptedKeys, encryptedAccessKey, encryptedSecretKey, outputPath);
-                    var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
-                    var appsettingsPowershellInfo = string.Format(ResourceStrings.AppSettingsPowershellAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
+                    Console.WriteLine(keyInfo);
                     if (RunType == RunTypes.Powershell)
                     {
+                        var appsettingsPowershellInfo = string.Format(ResourceStrings.AppSettingsPowershellAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
                         Console.WriteLine(appsettingsPowershellInfo);
                     }
                     else
                     {
-                        Console.WriteLine(keyInfo);
+
+                        var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
                         Console.WriteLine(appSettingsInfo);
                     }
                 }

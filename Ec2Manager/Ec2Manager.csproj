@@ -10,14 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.3.102.3" />
-    <PackageReference Include="AWSSDK.EC2" Version="3.3.114" />
-    <PackageReference Include="CommandLineParser" Version="2.5.0" />
-    <PackageReference Include="HybridScaffolding" Version="1.0.13" />
+    <PackageReference Include="AWSSDK.Core" Version="3.3.103.45" />
+    <PackageReference Include="AWSSDK.EC2" Version="3.3.131.3" />
+    <PackageReference Include="CommandLineParser" Version="2.6.0" />
+    <PackageReference Include="HybridScaffolding" Version="1.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
-    <PackageReference Include="System.CodeDom" Version="4.5.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
+    <PackageReference Include="System.CodeDom" Version="4.6.0" />
   </ItemGroup>
 
 </Project>
