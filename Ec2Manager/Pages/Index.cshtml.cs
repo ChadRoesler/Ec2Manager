@@ -1,13 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Ec2Manager.Models;
 using Ec2Manager.Workers;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Ec2Manager.Pages
 {
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly IOptions<AppConfig> config;
@@ -42,35 +44,25 @@ namespace Ec2Manager.Pages
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                //var searchStringSplit = searchString.Split('=');
-                //if (searchStringSplit.Count() > 1)
-                //{
-                    //searchString = searchStringSplit[1];
-                    //var searchType = searchStringSplit[0];
-                    switch (CurrentSearchType.ToUpper())
-                    {
-                        case "IPADDRESS":
-                            instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.IpAddress, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "ACCOUNT":
-                            instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.AccountName, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "STATUS":
-                            instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.Status, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "ID":
-                            instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.Id, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "NAME":
-                        default:
-                            instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.Name, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                    }
-                //}
-                //else
-                //{
-                //    instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.Name, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                //}
+                switch (CurrentSearchType.ToUpper())
+                {
+                    case "IPADDRESS":
+                        instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.IpAddress, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "ACCOUNT":
+                        instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.AccountName, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "STATUS":
+                        instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.Status, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "ID":
+                        instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.Id, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "NAME":
+                    default:
+                        instances = (await InstanceManagement.ListEc2Instances(config)).Where(x => Regex.Match(x.Name, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                }
             }
 
             switch (sortOrder)

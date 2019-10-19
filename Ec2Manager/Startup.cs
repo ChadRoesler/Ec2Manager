@@ -1,9 +1,12 @@
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Okta.AspNetCore;
 using Ec2Manager.Models;
 
 namespace Ec2Manager
@@ -36,7 +39,22 @@ namespace Ec2Manager
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OktaDefaults.MvcAuthenticationScheme;
+            })
+            .AddCookie()
+            .AddOktaMvc(new OktaMvcOptions
+            {
+                OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
+                ClientId = Configuration.GetValue<string>("Okta:ClientId"),
+                ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
+                Scope = new List<string> { "openid", "profile", "email" },
+            });
 
+            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddOptions();
             services.Configure<AppConfig>(Configuration);
@@ -59,7 +77,7 @@ namespace Ec2Manager
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-
+            app.UseAuthentication();
             app.UseMvc();
         }
     }

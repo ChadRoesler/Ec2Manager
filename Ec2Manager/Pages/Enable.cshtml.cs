@@ -26,6 +26,5 @@ namespace Ec2Manager.Pages
             await InstanceManagement.StartEc2Instance(config, account, instanceId);
             return RedirectToPage("./Index");
         }
-
     }
 }
