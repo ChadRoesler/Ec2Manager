@@ -9,6 +9,7 @@ using Ec2Manager.Workers;
 
 namespace Ec2Manager.Pages
 {
+    
     [Authorize]
     public class IndexModel : PageModel
     {

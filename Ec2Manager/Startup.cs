@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Okta.AspNetCore;
 using Ec2Manager.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Ec2Manager
 {
@@ -39,21 +40,32 @@ namespace Ec2Manager
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddAuthentication(options =>
+            if (Configuration.GetValue<string>("Okta:OktaDomain") != null)
             {
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OktaDefaults.MvcAuthenticationScheme;
-            })
-            .AddCookie()
-            .AddOktaMvc(new OktaMvcOptions
+                services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OktaDefaults.MvcAuthenticationScheme;
+                })
+                .AddCookie()
+                .AddOktaMvc(new OktaMvcOptions
+                {
+                    OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
+                    ClientId = Configuration.GetValue<string>("Okta:ClientId"),
+                    ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
+                    Scope = new List<string> { "openid", "profile", "email" }
+                });
+            }
+            else
             {
-                OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
-                ClientId = Configuration.GetValue<string>("Okta:ClientId"),
-                ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
-                Scope = new List<string> { "openid", "profile", "email" },
-            });
-
+                services.AddAuthorization(options =>
+                {
+                    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                        .RequireAssertion(_ => true)
+                        .Build();
+                });
+            }
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddOptions();
@@ -77,7 +89,10 @@ namespace Ec2Manager
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-            app.UseAuthentication();
+            if (Configuration.GetValue<string>("Okta:OktaDomain") != null)
+            {
+                app.UseAuthentication();
+            }
             app.UseMvc();
         }
     }
