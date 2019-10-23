@@ -113,6 +113,7 @@
    asp-route-sortOrder="@Model.CurrentSort"
    asp-route-pageIndex="@(Model.Instances.PageIndex - 1)"
    asp-route-currentFilter="@Model.CurrentFilter"
+   asp-route-currentsearchtype="@Model.CurrentSearchType"
    class="btn btn-default @prevDisabled">
     Previous
 </a>
@@ -120,6 +121,7 @@
    asp-route-sortOrder="@Model.CurrentSort"
    asp-route-pageIndex="@(Model.Instances.PageIndex + 1)"
    asp-route-currentFilter="@Model.CurrentFilter"
+   asp-route-currentsearchtype="@Model.CurrentSearchType"
    class="btn btn-default @nextDisabled">
     Next
 </a>
