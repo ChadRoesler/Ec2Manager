@@ -28,6 +28,7 @@ namespace Ec2Manager.Pages
 
         public async Task OnGetAsync(string sortOrder, string currentSearchType, string currentFilter, string searchString, int? pageIndex)
         {
+            
             CurrentSort = sortOrder;
             NameSort = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             StatusSort = sortOrder == "status" ? "status_desc" : "status";
@@ -42,7 +43,7 @@ namespace Ec2Manager.Pages
             }
             CurrentSearchType = currentSearchType;
             CurrentFilter = searchString;
-
+            
             if (!string.IsNullOrEmpty(searchString))
             {
                 switch (CurrentSearchType.ToUpper())

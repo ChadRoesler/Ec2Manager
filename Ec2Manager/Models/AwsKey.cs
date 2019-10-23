@@ -35,7 +35,7 @@ namespace Ec2Manager.Models
         internal string AccountName { get; set; }
         internal string Tag { get; set; }
         internal string TagSearchString { get; set; }
-        internal RegionEndpoint Region {get; set; }
+        internal RegionEndpoint Region { get; set; }
 
         internal void EncryptKeys(string OutputDirectory, RunTypes RunType)
         {
@@ -111,7 +111,7 @@ namespace Ec2Manager.Models
                 }
                 else
                 {
-                    var outputPath = Path.Combine(OutputDirectory, assemblyName).Replace("\\\\","\\");
+                    var outputPath = Path.Combine(OutputDirectory, assemblyName).Replace("\\\\", "\\");
                     compilation.Emit(outputPath);
                     File.SetCreationTime(outputPath, currentDateTime);
                     File.SetLastWriteTime(outputPath, currentDateTime.Add(new TimeSpan(new Random().Next(365), 0, 0, new Random().Next(86400))));
@@ -124,7 +124,6 @@ namespace Ec2Manager.Models
                     }
                     else
                     {
-                        
                         var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
                         Console.WriteLine(appSettingsInfo);
                     }

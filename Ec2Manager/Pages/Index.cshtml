@@ -95,7 +95,7 @@
                 <td>
                     @{ if (item.Status.Equals("Stopped", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            <a asp-page="./Enable" asp- asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-page="./Enable" asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
                         } }
                 </td>
             </tr>
