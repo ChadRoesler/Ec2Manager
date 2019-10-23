@@ -124,7 +124,6 @@ namespace Ec2Manager.Models
                     }
                     else
                     {
-
                         var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, encryptedAccessKey, encryptedSecretKey, AccountName);
                         Console.WriteLine(appSettingsInfo);
                     }

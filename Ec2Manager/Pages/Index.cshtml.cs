@@ -1,13 +1,16 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Ec2Manager.Models;
 using Ec2Manager.Workers;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Ec2Manager.Pages
 {
+    
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly IOptions<AppConfig> config;
@@ -43,25 +46,25 @@ namespace Ec2Manager.Pages
             
             if (!string.IsNullOrEmpty(searchString))
             {
-                switch (currentSearchType.ToUpper())
-                    {
-                        case "IPADDRESS":
-                            instances = instances.Where(x => Regex.Match(x.IpAddress, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "ACCOUNT":
-                            instances = instances.Where(x => Regex.Match(x.AccountName, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "STATUS":
-                            instances = instances.Where(x => Regex.Match(x.Status, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "ID":
-                            instances = instances.Where(x => Regex.Match(x.Id, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                        case "NAME":
-                        default:
-                            instances = instances.Where(x => Regex.Match(x.Name, searchString, RegexOptions.IgnoreCase).Success).ToList();
-                            break;
-                    }
+                switch (CurrentSearchType.ToUpper())
+                {
+                    case "IPADDRESS":
+                        instances = instances.Where(x => Regex.Match(x.IpAddress, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "ACCOUNT":
+                        instances = instances.Where(x => Regex.Match(x.AccountName, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "STATUS":
+                        instances = instances.Where(x => Regex.Match(x.Status, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "ID":
+                        instances = instances.Where(x => Regex.Match(x.Id, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                    case "NAME":
+                    default:
+                        instances = instances.Where(x => Regex.Match(x.Name, searchString, RegexOptions.IgnoreCase).Success).ToList();
+                        break;
+                }
             }
 
             switch (sortOrder)

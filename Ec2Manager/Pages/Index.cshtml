@@ -95,7 +95,7 @@
                 <td>
                     @{ if (item.Status.Equals("Stopped", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            <a asp-page="./Enable" asp- asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-page="./Enable" asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
                         } }
                 </td>
             </tr>
@@ -113,7 +113,7 @@
    asp-route-sortOrder="@Model.CurrentSort"
    asp-route-pageIndex="@(Model.Instances.PageIndex - 1)"
    asp-route-currentFilter="@Model.CurrentFilter"
-   asp-route-currentsearchtype="@Model.CurrentSearchType"
+   asp-route-currentSearchType="@Model.CurrentSearchType"
    class="btn btn-default @prevDisabled">
     Previous
 </a>
@@ -121,7 +121,7 @@
    asp-route-sortOrder="@Model.CurrentSort"
    asp-route-pageIndex="@(Model.Instances.PageIndex + 1)"
    asp-route-currentFilter="@Model.CurrentFilter"
-   asp-route-currentsearchtype="@Model.CurrentSearchType"
+   asp-route-currentSearchType="@Model.CurrentSearchType"
    class="btn btn-default @nextDisabled">
     Next
 </a>
