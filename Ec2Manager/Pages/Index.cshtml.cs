@@ -82,7 +82,7 @@ namespace Ec2Manager.Pages
                     instances = instances.OrderBy(s => s.Name).ToList();
                     break;
             }
-            var pageSize = 5;
+            var pageSize = config.Value.Ec2Manager.ResultsPerPage;
             Instances = PaginatedList<AwsEc2Instance>.Create(
                 instances, pageIndex ?? 1, pageSize);
         }
