@@ -73,6 +73,10 @@
             </th>
             <th>
             </th>
+            @if(Model.EnableReboot)
+                {
+                    <th></th>
+                }
         </tr>
     </thead>
     <tbody>
@@ -103,6 +107,17 @@
                             <a asp-page="./Enable" asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Enable</a>
                         } }
                 </td>
+                @if (Model.EnableReboot)
+                    {
+                <td>
+                    @{ if (item.Status.Equals("Running", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            <a asp-page="./Reboot" asp-route-id="@item.AccountName+@item.Id" class="btn btn-primary btn-default">Reboot</a>
+                        }
+                    }
+                </td>
+
+                }
             </tr>
         }
 

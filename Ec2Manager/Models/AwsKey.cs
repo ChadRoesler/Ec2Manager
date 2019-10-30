@@ -26,6 +26,7 @@ namespace Ec2Manager.Models
             AccessKey = account.AccessKeyHash;
             SecretKey = account.SecretKeyHash;
             AccountName = account.Name;
+            NameTag = account.NameTag;
             Tag = account.TagToSearch;
             TagSearchString = account.TagSearchString;
             Region = RegionEndpoint.GetBySystemName(account.Region);
@@ -33,6 +34,7 @@ namespace Ec2Manager.Models
         internal string AccessKey { get; set; }
         internal string SecretKey { get; set; }
         internal string AccountName { get; set; }
+        internal string NameTag { get; set; }
         internal string Tag { get; set; }
         internal string TagSearchString { get; set; }
         internal RegionEndpoint Region { get; set; }

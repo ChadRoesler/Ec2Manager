@@ -61,7 +61,7 @@ namespace Ec2Manager.Workers
                         {
                             if (Regex.Match(instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.Tag).Value, decryptedAccountKey.TagSearchString).Success)
                             {
-                                var name = instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.Tag).Value;
+                                var name = instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.NameTag).Value;
                                 var ec2InstanceToManage = new AwsEc2Instance(name, instance.PrivateIpAddress, instance.InstanceId, instance.State.Name.Value, accountKey.AccountName);
                                 ecInstancesToManage.Add(ec2InstanceToManage);
                             }
@@ -80,6 +80,16 @@ namespace Ec2Manager.Workers
             var startRequest = new StartInstancesRequest(instanceIdAsList);
             var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
             await ec2Client.StartInstancesAsync(startRequest);
+        }
+
+        internal static async Task RebootEc2Instance(IOptions<AppConfig> Configuration, string AccountName, string InstanceId)
+        {
+            var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
+            var decryptedAccountKey = DecryptKeys(accountKey);
+            var instanceIdAsList = new List<string> { InstanceId };
+            var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
+            var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
+            await ec2Client.RebootInstancesAsync(rebootRequest);
         }
     }
 }

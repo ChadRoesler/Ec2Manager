@@ -8,5 +8,6 @@
         public string SecretKeyHash { get; set; }
         public string TagToSearch { get; set; }
         public string TagSearchString { get; set; }
+        public string NameTag { get; set; }
     }
 }

@@ -25,10 +25,16 @@ namespace Ec2Manager.Pages
         public string CurrentFilter { get; set; }
         public string CurrentSort { get; set; }
         public string CurrentSearchType { get; set; }
+        public bool EnableReboot
+        {
+            get
+            {
+                return config.Value.Ec2Manager.EnableReboot;
+            }
+        }
 
         public async Task OnGetAsync(string sortOrder, string currentSearchType, string currentFilter, string searchString, int? pageIndex)
         {
-            
             CurrentSort = sortOrder;
             NameSort = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             StatusSort = sortOrder == "status" ? "status_desc" : "status";
