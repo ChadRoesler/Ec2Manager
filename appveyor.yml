@@ -1,0 +1,39 @@
+version: 1.0.{build}
+branches:
+  only:
+  - master
+skip_tags: true
+skip_commits:
+  files:
+    - README.md
+image: Visual Studio 2017
+configuration: Release
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  version_prefix: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+before_build:
+- cmd: dotnet restore Ec2manager.sln
+build:
+  publish_wap: true
+  verbosity: minimal
+after_build:
+- cmd: dotnet publish Ec2Manager\Ec2Manager.csproj
+artifacts:
+- path: '\Ec2Manager\bin\release\netcoreapp2.2\publish'
+  name: Ec2Manager
+  type: WebDeployPackage
+deploy:
+- provider: GitHub
+  tag: Ec2Manager-v$(appveyor_build_version)
+  release: Ec2Manager-v$(appveyor_build_version)
+  description: Ec2Manager-v$(appveyor_build_version)
+  auth_token:
+    secure: zoaU2+fLG/H7nvO4Qd9QW32NoHUC47fz+61pHlytQr5jgdQIZDcJ4d2TRFS1UOeS
+  repository: ChadRoesler/Ec2Manager
+  artifact: Ec2Manager\bin\Release\netcoreapp2.2\Ec2Manager.zip
