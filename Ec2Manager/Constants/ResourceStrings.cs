@@ -14,6 +14,7 @@ KeyFilePath: {2}
         internal const string AppSettingsAddition = @"==============[AppSetting Value]==============
       {{
         ""AccessKeyHash"": ""{0}"",
+        ""NameTag"": ""NameOfTagForNameColumnHere"",
         ""Name"": ""{2}"",
         ""Region"": ""RegionHere"",
         ""SecretKeyHash"": ""{1}"",
@@ -24,6 +25,7 @@ KeyFilePath: {2}
 ";
         internal const string AppSettingsPowershellAddition = @"{{
     ""AccessKeyHash"": ""{0}"",
+    ""NameTag"": ""NameOfTagForNameColumnHere"",
     ""Name"": ""{2}"",
     ""Region"": ""RegionHere"",
     ""SecretKeyHash"": ""{1}"",
