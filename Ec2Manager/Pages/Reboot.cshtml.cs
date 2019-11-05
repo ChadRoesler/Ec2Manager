@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Ec2Manager.Models;
 using Ec2Manager.Workers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Ec2Manager.Pages
 {
+    [Authorize]
     public class RebootModel : PageModel
     {
         private readonly IOptions<AppConfig> config;

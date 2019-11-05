@@ -53,6 +53,7 @@ namespace Ec2Manager.Workers
                 var describeRequest = new DescribeInstancesRequest();
                 var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
                 var describeResponse = await ec2Client.DescribeInstancesAsync(describeRequest);
+                ec2Client.Dispose();
                 foreach (var reservation in describeResponse.Reservations)
                 {
                     foreach (var instance in reservation.Instances)
@@ -80,6 +81,7 @@ namespace Ec2Manager.Workers
             var startRequest = new StartInstancesRequest(instanceIdAsList);
             var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
             await ec2Client.StartInstancesAsync(startRequest);
+            ec2Client.Dispose();
         }
 
         internal static async Task RebootEc2Instance(IOptions<AppConfig> Configuration, string AccountName, string InstanceId)
@@ -90,6 +92,7 @@ namespace Ec2Manager.Workers
             var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
             var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
             await ec2Client.RebootInstancesAsync(rebootRequest);
+            ec2Client.Dispose();
         }
     }
 }
