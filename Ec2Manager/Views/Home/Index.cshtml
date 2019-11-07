@@ -1,0 +1,75 @@
+﻿@using Microsoft.Extensions.Configuration
+@using PagedList.Core
+@using PagedList.Core.Mvc
+@using Ec2Manager.Models.DataManagement
+@inject IConfiguration Configuration
+@model Ec2Manager.Models.DataManagement.SearchResult
+
+@{
+    var hasResult = Model.SearchHits != null && Model.SearchHits.TotalItemCount > 0;
+}
+@if (hasResult)
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+            </th>
+            <th>
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
+            </th>
+            <th>
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
+            </th>
+            <th>
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.SearchHits)
+        {
+        <tr>
+            <td>
+                <img src="@Url.Content(item.StatusImage)" alt="statusimage" />
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Account)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IpAddress)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @if(@item.Status.Equals("stopped"))
+                {
+                <a asp-action="Enable" asp-route-id="@item.Id" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" class="btn btn-primary btn-default">Enable</a>
+                }
+                @if (@Configuration.GetValue<bool>("Ec2Manager:EnableRebootFunction") && @item.Status.Equals("running"))
+                {
+                <a asp-action="Reboot" asp-route-id="@item.Id"  asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" class="btn btn-primary btn-default">Reboot</a>
+                }
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+<br />
+
+<p><pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4Minimal" asp-action="Index" asp-controller="Home" asp-route-query="@Model.SearchQuery" /></p>
+
+}
