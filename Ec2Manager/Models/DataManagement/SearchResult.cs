@@ -10,7 +10,7 @@ namespace Ec2Manager.Models.DataManagement
 
         public int Page { get; set; }
 
-        public string SearchType { get; set; }
         public string SortOrder { get; set; }
+        public string SearchType { get; set; }
     }
 }

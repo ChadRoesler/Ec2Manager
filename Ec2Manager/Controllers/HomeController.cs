@@ -29,36 +29,36 @@ namespace Ec2Manager.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> IndexAsync(string query, int? page)
+        public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder)
         {
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var pageSize = _configuration.GetValue<int>("Ec2Manager:ResultsPerPage");
             var search = new SearchService(instances);
-
-            var model = search.GetSearchResult(query, pageNumber, pageSize);
+            var model = search.GetSearchResult(searchtype, query, pageNumber, pageSize, sortorder);
             return View(model);
         }
 
 
         [Authorize]
-        public async Task<IActionResult> EnableAsync(string Id, string query, int? page)
+        public async Task<IActionResult> EnableAsync(string searchtype, string Id, string query, int? page, string sortorder)
         {
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
             var instance = instances.Where(x => x.Id.Equals(Id, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
             InstanceManagement.StartEc2Instance(_configuration, instance.Account, instance.Id);
-            return RedirectToAction("Index", new {query, page = pageNumber });
+            return RedirectToAction("Index", new { searchtype, query, page = pageNumber, sortorder });
+
         }
 
         [Authorize]
-        public async Task<IActionResult> RebootAsync(string Id, string query, int? page)
+        public async Task<IActionResult> RebootAsync(string searchtype, string Id, string query, int? page, string sortorder)
         {
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
             var instance = instances.Where(x => x.Id.Equals(Id, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
             InstanceManagement.RebootEc2Instance(_configuration, instance.Account, instance.Id);
-            return RedirectToAction("Index", new { query, page = pageNumber });
+            return RedirectToAction("Index", new { searchtype, query, page = pageNumber, sortorder });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
