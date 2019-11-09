@@ -1,6 +1,6 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Ec2Manager",
+    "short_name": "Ec2Manager",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",

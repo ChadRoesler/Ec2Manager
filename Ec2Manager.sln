@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2EC8EB5B-B311-4552-87D6-EC4FB7BD00A2}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		OktaLogo.png = OktaLogo.png
 	EndProjectSection
 EndProject
 Global

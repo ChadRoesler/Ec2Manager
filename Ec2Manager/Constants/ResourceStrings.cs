@@ -1,6 +1,6 @@
 ﻿namespace Ec2Manager.Constants
 {
-    public class ResourceStrings
+    internal class ResourceStrings
     {
         internal const string LanguageType = "CSharp";
         internal const string KeyFileName = "{0}.dll";

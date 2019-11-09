@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Ec2Manager.Interfaces;
-using PagedList.Core;
 using System.Text.RegularExpressions;
+using PagedList.Core;
+using Ec2Manager.Interfaces;
 
 namespace Ec2Manager.Models.DataManagement
 {

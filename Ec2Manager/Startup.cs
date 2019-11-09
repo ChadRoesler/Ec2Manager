@@ -1,20 +1,20 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Http;
 using Okta.AspNetCore;
-using Microsoft.AspNetCore.Mvc;
+using HealthChecks.UI.Client;
+using Ec2Manager.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Ec2Manager
 {
@@ -45,7 +45,7 @@ namespace Ec2Manager
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
+            services.AddHealthChecks();
             if (Configuration.GetValue<string>("Okta:OktaDomain") != null)
             {
                 services.AddAuthorizationCore();
@@ -78,40 +78,69 @@ namespace Ec2Manager
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory log)
         {
+            log.AddLog4Net();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseDeveloperExceptionPage();
-                //app.UseExceptionHandler("/Home/Error");
+                app.UseStatusCodePages();
+                app.UseMiddleware<ErrorHandler>();
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseHealthChecks("/healthcheck", new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
             app.UseRouting();
             app.UseAuthorization();
             if (Configuration.GetValue<string>("Okta:OktaDomain") != null)
             {
                 app.UseAuthentication();
             }
-            //app.UseMvc();
+
+            ///////////////////////////////////////////
+            /// Commented out until Okta asp.net 3.0
+            /////////////////////////////////////////
+
             //app.UseEndpoints(endpoints =>
             //{
             //    endpoints.MapControllerRoute(
             //        name: "default",
             //        pattern: "{controller=Home}/{action=Index}/{id?}");
+            //    endpoints.MapControllerRoute(name: "Error",
+            //                                        "error",
+            //                                        new { controller = "Home", action = "Error" });
+
+            //    endpoints.MapControllerRoute(name: "PageNotFound",
+            //                                    "pagenotfound",
+            //                                    new { controller = "Home", action = "PageNotFound" });
             //});
             app.UseMvc(routes =>
             {
+
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute(name: "Error",
+                                    "error",
+                                    new { controller = "Home", action = "Error" });
+                routes.MapRoute(name: "PageNotFound",
+                                                "pagenotfound",
+                                                new { controller = "Home", action = "PageNotFound" });
+                //    routes.MapRoute(
+                //        name: "Error",
+                //        template: "{controller=Home}/{action=Error}");
+                //    routes.MapRoute(
+                //       name: "PageNotFound",
+                //       template: "{controller=Home}/{action=PageNotFound}");
             });
         }
     }

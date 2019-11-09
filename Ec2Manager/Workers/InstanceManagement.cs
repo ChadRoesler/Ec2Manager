@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Options;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Ec2Manager.Constants;
@@ -56,26 +53,40 @@ namespace Ec2Manager.Workers
 
         internal static void StartEc2Instance(IConfiguration Configuration, string AccountName, string InstanceId)
         {
-            var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
-            var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-            var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
-            var instanceIdAsList = new List<string> { InstanceId };
-            var startRequest = new StartInstancesRequest(instanceIdAsList);
-            var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
-            ec2Client.StartInstancesAsync(startRequest);
-            ec2Client.Dispose();
+            try
+            {
+                var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
+                var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
+                var instanceIdAsList = new List<string> { InstanceId };
+                var startRequest = new StartInstancesRequest(instanceIdAsList);
+                var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
+                ec2Client.StartInstancesAsync(startRequest);
+                ec2Client.Dispose();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, InstanceId, e.Message), e.InnerException);
+            }
         }
 
         internal static void RebootEc2Instance(IConfiguration Configuration, string AccountName, string InstanceId)
         {
-            var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
-            var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-            var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
-            var instanceIdAsList = new List<string> { InstanceId };
-            var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
-            var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
-            ec2Client.RebootInstancesAsync(rebootRequest);
-            ec2Client.Dispose();
+            try
+            {
+                var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
+                var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
+                var instanceIdAsList = new List<string> { InstanceId };
+                var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
+                var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
+                ec2Client.RebootInstancesAsync(rebootRequest);
+                ec2Client.Dispose();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.RebootEc2InstanceError, InstanceId, e.Message), e.InnerException);
+            }
         }
     }
 }

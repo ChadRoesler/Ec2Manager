@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Linq;
-using System.Diagnostics;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Ec2Manager.Models;
-using Microsoft.Extensions.Configuration;
-using Ec2Manager.Workers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Ec2Manager.Models.DataManagement;
-using Ec2Manager.Interfaces;
+using Ec2Manager.Workers;
 
 namespace Ec2Manager.Controllers
 {
@@ -31,11 +27,15 @@ namespace Ec2Manager.Controllers
         [Authorize]
         public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder)
         {
+            _logger.LogInformation("Loading Instances");
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
+            _logger.LogInformation("Initially Loaded with {instances.Count} Instances");
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var pageSize = _configuration.GetValue<int>("Ec2Manager:ResultsPerPage");
             var search = new SearchService(instances);
+            _logger.LogInformation("Passing the following: query = {query} pageNumber = {pageNumber} pageSize = {pageSize} sortOrder = {sortorder}");
             var model = search.GetSearchResult(searchtype, query, pageNumber, pageSize, sortorder);
+            _logger.LogInformation("");
             return View(model);
         }
 
@@ -61,10 +61,10 @@ namespace Ec2Manager.Controllers
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, sortorder });
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        [HttpGet]
+        public ViewResult Error() => View("Error");
+
+        [HttpGet]
+        public ViewResult PageNotFound() => View("PageNotFound");
     }
 }

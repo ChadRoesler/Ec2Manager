@@ -10,6 +10,16 @@
 @{
     var hasResult = Model.SearchHits != null && Model.SearchHits.TotalItemCount > 0;
 }
+@if (!hasResult)
+{
+    <div class="text-center">
+        <img class="figure-img" src="~/images/unknown.png" />
+        <p>No matches were found for <strong>"@Model.SearchQuery"</strong> in <strong>"@Model.SearchType"</strong></p>
+        <a asp-action="Index" asp-controller="Home">
+            Return to List
+        </a>
+    </div>
+}
 @if (hasResult)
 {
     <table class="table">
@@ -129,6 +139,23 @@
     </table>
     <br />
 
-    <p><pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4Minimal" asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="@Model.SortOrder" /></p>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white">
+        <div class="container">
+            <pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4Minimal" asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="@Model.SortOrder" />
+            @*<div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                <div id="navbarSearch" class="navbar-search pull-right">
+                    <a class="navbar-brand">Results Per Page</a>
+                    <form class="form-inline my-2 my-lg-0" method="get" asp-controller="Home">
+                        <select class="form-control mr-sm-2" id="itemsperpage" name="itemsperpage">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                        </select>
 
-}
+                    </form>
+                </div>
+            </div>*@
+        </div>
+    </nav>
+
+        }
