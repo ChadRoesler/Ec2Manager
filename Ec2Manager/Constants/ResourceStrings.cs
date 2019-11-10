@@ -2,6 +2,7 @@
 {
     internal class ResourceStrings
     {
+        internal const string UserClaimUserName = "preferred_username";
         internal const string LanguageType = "CSharp";
         internal const string KeyFileName = "{0}.dll";
         internal const string KeyType = "Ec2Manager.CryptographyManagement";

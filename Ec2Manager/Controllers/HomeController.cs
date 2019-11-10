@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Ec2Manager.Constants;
 using Ec2Manager.Models.DataManagement;
 using Ec2Manager.Workers;
 
@@ -25,40 +26,44 @@ namespace Ec2Manager.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder)
+        public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder, string  pagesize)
         {
-            _logger.LogInformation("Loading Instances");
+            var userClaims = HttpContext.User.Claims;
+            var username = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault().Value;
+            _logger.LogInformation(string.Format(MessageStrings.LoadingInstances, username));
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
-            _logger.LogInformation("Initially Loaded with {instances.Count} Instances");
+            _logger.LogInformation(string.Format(MessageStrings.InitialInstanceCount, instances.Count));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            var pageSize = _configuration.GetValue<int>("Ec2Manager:ResultsPerPage");
             var search = new SearchService(instances);
-            _logger.LogInformation("Passing the following: query = {query} pageNumber = {pageNumber} pageSize = {pageSize} sortOrder = {sortorder}");
-            var model = search.GetSearchResult(searchtype, query, pageNumber, pageSize, sortorder);
-            _logger.LogInformation("");
+            _logger.LogInformation(string.Format(MessageStrings.SearchedInstanceCount, instances.Count, searchtype, query, sortorder));
+            var model = search.GetSearchResult(searchtype, query, pageNumber, pagesize, sortorder);
             return View(model);
         }
 
 
         [Authorize]
-        public async Task<IActionResult> EnableAsync(string searchtype, string Id, string query, int? page, string sortorder)
+        public IActionResult Enable(string Id, string account, string searchtype, string query, int? page, string sortorder, string  pagesize)
         {
+            var userClaims = HttpContext.User.Claims;
+            var username = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault().Value;
+            _logger.LogInformation(string.Format(MessageStrings.UserEnable, username, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
-            var instance = instances.Where(x => x.Id.Equals(Id, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
-            InstanceManagement.StartEc2Instance(_configuration, instance.Account, instance.Id);
-            return RedirectToAction("Index", new { searchtype, query, page = pageNumber, sortorder });
+            InstanceManagement.StartEc2Instance(_configuration, account, Id);
+            _logger.LogInformation(string.Format(MessageStrings.UserEnableSuccess, username, Id));
+            return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
 
         }
 
         [Authorize]
-        public async Task<IActionResult> RebootAsync(string searchtype, string Id, string query, int? page, string sortorder)
+        public IActionResult Reboot(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
+            var userClaims = HttpContext.User.Claims;
+            var username = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault().Value;
+            _logger.LogInformation(string.Format(MessageStrings.UserEnable, username, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
-            var instance = instances.Where(x => x.Id.Equals(Id, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
-            InstanceManagement.RebootEc2Instance(_configuration, instance.Account, instance.Id);
-            return RedirectToAction("Index", new { searchtype, query, page = pageNumber, sortorder });
+            InstanceManagement.RebootEc2Instance(_configuration, account, Id);
+            _logger.LogInformation(string.Format(MessageStrings.UserRebootSuccess, username, Id));
+            return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
 
         [HttpGet]

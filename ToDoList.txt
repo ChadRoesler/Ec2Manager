@@ -4,6 +4,5 @@ Log more!
 	Error status codes
 	Fatal on exceptions
 
-Figure out Results per page
-Get User info from Okta
+Figure out Results per page - NOPE
 Figure out OIDC in okta, so i can trash all 2.2 dependencies.

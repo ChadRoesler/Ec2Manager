@@ -3,9 +3,11 @@
 @using PagedList.Core.Mvc
 @using Ec2Manager.Models.DataManagement
 @inject IConfiguration Configuration
-@model Ec2Manager.Models.DataManagement.SearchResult
+@model SearchResult
 @{
     ViewData["Title"] = "Base";
+    ViewData["SearchQuery"] = Model.SearchQuery;
+    ViewData["SearchType"] = Model.SearchType;
 }
 @{
     var hasResult = Model.SearchHits != null && Model.SearchHits.TotalItemCount > 0;
@@ -30,13 +32,13 @@
                 <th>
                     @if (Model.SortOrder == "name")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="name_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="name">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
                         </a>
                     }
@@ -44,13 +46,13 @@
                 <th>
                     @if (Model.SortOrder == "account")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="account_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="account">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
                         </a>
                     }
@@ -58,13 +60,13 @@
                 <th>
                     @if (Model.SortOrder == "status")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="status_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="status">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
                         </a>
                     }
@@ -73,13 +75,13 @@
                 <th>
                     @if (Model.SortOrder == "ipaddress")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="ipaddress_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="ipaddress">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
                         </a>
                     }
@@ -87,13 +89,13 @@
                 <th>
                     @if (Model.SortOrder == "id")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="id_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="id">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
                         </a>
                     }
@@ -126,11 +128,11 @@
                     <td>
                         @if (@item.Status.Equals("stopped"))
                         {
-                            <a asp-action="Enable" asp-route-id="@item.Id" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-action="Enable" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
                         }
                         @if (@Configuration.GetValue<bool>("Ec2Manager:EnableRebootFunction") && @item.Status.Equals("running"))
                         {
-                            <a asp-action="Reboot" asp-route-id="@item.Id" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Reboot</a>
+                            <a asp-action="Reboot" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-pagesize="@Model.PageSize" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Reboot</a>
                         }
                     </td>
                 </tr>
@@ -141,21 +143,7 @@
 
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white">
         <div class="container">
-            <pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4Minimal" asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="@Model.SortOrder" />
-            @*<div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                <div id="navbarSearch" class="navbar-search pull-right">
-                    <a class="navbar-brand">Results Per Page</a>
-                    <form class="form-inline my-2 my-lg-0" method="get" asp-controller="Home">
-                        <select class="form-control mr-sm-2" id="itemsperpage" name="itemsperpage">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                        </select>
-
-                    </form>
-                </div>
-            </div>*@
+            <pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4PageNumbersPlusPrevAndNext" asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="@Model.SortOrder" asp-route-pagesize="@Model.PageSize" />
         </div>
     </nav>
-
-        }
+}

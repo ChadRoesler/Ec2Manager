@@ -2,7 +2,8 @@
     ViewData["Title"] = "Error";
     string notFoundMessage = "Sorry, The page cannot be found";
     string pageNotFound = Context.Request.Cookies["PageNotFound"];
-    if (pageNotFound != null){
+    if (pageNotFound != null)
+    {
         notFoundMessage += " : ";
     }
 }

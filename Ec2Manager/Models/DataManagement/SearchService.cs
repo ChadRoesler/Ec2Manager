@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using PagedList.Core;
 using Ec2Manager.Interfaces;
+using System;
 
 namespace Ec2Manager.Models.DataManagement
 {
@@ -15,7 +16,7 @@ namespace Ec2Manager.Models.DataManagement
             searchData = ec2Instances;
         }
 
-        public SearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
+        public SearchResult GetSearchResult(string searchType, string query, int page, string pageSize, string sortOrder)
         {
             if(string.IsNullOrWhiteSpace(searchType))
             {
@@ -82,14 +83,19 @@ namespace Ec2Manager.Models.DataManagement
                     searchHits = searchHits.OrderBy(x => x.Name);
                     break;
             }
+            if (!int.TryParse(pageSize, out var pageSizeNumber))
+            {
+                pageSizeNumber = searchHits.Count() == 0 ? 5 : searchHits.Count();
+            }
 
             var searchResult = new SearchResult()
             {
-                SearchHits = new StaticPagedList<Ec2Instance>(searchHits.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHits.Count()),
+                SearchHits = new StaticPagedList<Ec2Instance>(searchHits.Skip((page - 1) * pageSizeNumber).Take(pageSizeNumber), page, pageSizeNumber, searchHits.Count()),
                 SearchQuery = query,
                 Page = page,
                 SortOrder = sortOrder,
-                SearchType = searchType
+                SearchType = searchType,
+                PageSize = pageSize
             };
 
             return searchResult;
