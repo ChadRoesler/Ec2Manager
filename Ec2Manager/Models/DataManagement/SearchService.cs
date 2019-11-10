@@ -16,7 +16,7 @@ namespace Ec2Manager.Models.DataManagement
             searchData = ec2Instances;
         }
 
-        public SearchResult GetSearchResult(string searchType, string query, int page, string pageSize, string sortOrder)
+        public SearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
         {
             if(string.IsNullOrWhiteSpace(searchType))
             {
@@ -83,19 +83,14 @@ namespace Ec2Manager.Models.DataManagement
                     searchHits = searchHits.OrderBy(x => x.Name);
                     break;
             }
-            if (!int.TryParse(pageSize, out var pageSizeNumber))
-            {
-                pageSizeNumber = searchHits.Count() == 0 ? 5 : searchHits.Count();
-            }
 
             var searchResult = new SearchResult()
             {
-                SearchHits = new StaticPagedList<Ec2Instance>(searchHits.Skip((page - 1) * pageSizeNumber).Take(pageSizeNumber), page, pageSizeNumber, searchHits.Count()),
+                SearchHits = new StaticPagedList<Ec2Instance>(searchHits.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHits.Count()),
                 SearchQuery = query,
                 Page = page,
                 SortOrder = sortOrder,
-                SearchType = searchType,
-                PageSize = pageSize
+                SearchType = searchType
             };
 
             return searchResult;

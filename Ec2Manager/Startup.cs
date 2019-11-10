@@ -11,10 +11,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Okta.AspNetCore;
+//using Okta.AspNetCore;
 using HealthChecks.UI.Client;
 using Ec2Manager.Models;
 using Microsoft.Extensions.Logging;
+
+using Microsoft.IdentityModel.Tokens;
 
 namespace Ec2Manager
 {
@@ -53,16 +55,34 @@ namespace Ec2Manager
                 {
                     sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    sharedOptions.DefaultChallengeScheme = OktaDefaults.MvcAuthenticationScheme;
+                    //sharedOptions.DefaultChallengeScheme = OktaDefaults.MvcAuthenticationScheme;
+                    sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 })
                 .AddCookie()
-                .AddOktaMvc(new OktaMvcOptions
+                .AddOpenIdConnect(options =>
                 {
-                    OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
-                    ClientId = Configuration.GetValue<string>("Okta:ClientId"),
-                    ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
-                    Scope = new List<string> { "openid", "profile", "email" }
+                    options.ClientId = Configuration["Okta:ClientId"];
+                    options.ClientSecret = Configuration["Okta:ClientSecret"];
+                    options.Authority = Configuration["Okta:OktaDomain"];
+                    options.CallbackPath = "/authorization-code/callback";
+                    options.ResponseType = "code";
+                    options.SaveTokens = true;
+                    options.UseTokenLifetime = false;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.Scope.Add("openid");
+                    options.Scope.Add("profile");
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        NameClaimType = "name"
+                    };
                 });
+                //.AddOktaMvc(new OktaMvcOptions
+                //{
+                //    OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
+                //    ClientId = Configuration.GetValue<string>("Okta:ClientId"),
+                //    ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
+                //    Scope = new List<string> { "openid", "profile", "email" }
+                //});
             }
             else
             {
@@ -74,6 +94,7 @@ namespace Ec2Manager
                 });
             }
             services.AddControllersWithViews();
+            //services.AddMvc();
             services.AddMvc(options => { options.EnableEndpointRouting = false; }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 

@@ -26,7 +26,7 @@ namespace Ec2Manager.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder, string  pagesize)
+        public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder)
         {
             var userClaims = HttpContext.User.Claims;
             var username = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault().Value;
@@ -36,7 +36,7 @@ namespace Ec2Manager.Controllers
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var search = new SearchService(instances);
             _logger.LogInformation(string.Format(MessageStrings.SearchedInstanceCount, instances.Count, searchtype, query, sortorder));
-            var model = search.GetSearchResult(searchtype, query, pageNumber, pagesize, sortorder);
+            var model = search.GetSearchResult(searchtype, query, pageNumber, 5, sortorder);
             return View(model);
         }
 
