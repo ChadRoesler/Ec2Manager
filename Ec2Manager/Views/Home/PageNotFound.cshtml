@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Error";
+    string notFoundMessage = "Sorry, The page cannot be found";
+    string pageNotFound = Context.Request.Cookies["PageNotFound"];
+    if (pageNotFound != null)
+    {
+        notFoundMessage += " : ";
+    }
+}
+
+<div class="text-center">
+    <img class="figure-img" src="~/images/unknown.png" />
+    <h1 class="text">WOMP! WOMP!</h1>
+</div>
+<div>
+    <h2 class="text">Something went wrong!</h2>
+    <div class="TextLine Label">@notFoundMessage<b>@pageNotFound</b></div>
+    <strong>Please contact your Administrator</strong>
+</div>

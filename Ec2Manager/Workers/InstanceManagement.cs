@@ -1,69 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Options;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Ec2Manager.Constants;
-using Ec2Manager.Models;
+using Ec2Manager.Models.DataManagement;
+using Microsoft.Extensions.Configuration;
+using Amazon;
 
 namespace Ec2Manager.Workers
 {
-    internal static class InstanceManagement
+    public static class InstanceManagement
     {
-
-        private static AwsKey DecryptKeys(AwsKey AwsKey)
+        internal static IList<AwsAccountInfoModel> LoadAwsAccounts(IConfiguration Configuration)
         {
-            var currentDir = AppDomain.CurrentDomain.BaseDirectory;
-            var path = Path.Combine(currentDir, string.Format(ResourceStrings.KeyFileName, AwsKey.AccountName));
-            var keyFile = Assembly.LoadFile(path);
-            var cryptographyManagement = keyFile.GetType(ResourceStrings.KeyType);
-            var cryptographyManagementObject = keyFile.CreateInstance(ResourceStrings.KeyType);
-            var decryption = cryptographyManagement.GetMethod(string.Format(ResourceStrings.DecryptionMethodName, AwsKey.AccountName), new Type[] { typeof(string) });
-            var encryptedAccessKeyAsObject = new object[] { AwsKey.AccessKey };
-            var encryptedSecretKeyAsObject = new object[] { AwsKey.SecretKey };
-            var decryptedAccessKey = (string)decryption.Invoke(cryptographyManagementObject, encryptedAccessKeyAsObject);
-            var decryptedSecretKey = (string)decryption.Invoke(cryptographyManagementObject, encryptedSecretKeyAsObject);
-            AwsKey.AccessKey = decryptedAccessKey;
-            AwsKey.SecretKey = decryptedSecretKey;
-            return AwsKey;
-        }
-
-        internal static List<AwsKey> LoadAwsAccounts(IOptions<AppConfig> Configuration)
-        {
-            var awsKeys = new List<AwsKey>();
-            foreach(var account in  Configuration.Value.Ec2Manager.Accounts)
-            {
-                awsKeys.Add(new AwsKey(account));
-            }
+            var awsKeys = Configuration.GetSection("Ec2Manager:Accounts").Get<IList<AwsAccountInfoModel>>();
             return awsKeys;
         }
 
-        internal static async Task<List<AwsEc2Instance>> ListEc2Instances(IOptions<AppConfig> Configuration)
+        internal static async Task<List<Ec2Instance>> ListEc2InstancesAsync(IConfiguration Configuration)
         {
-            var ecInstancesToManage = new List<AwsEc2Instance>();
+            var ecInstancesToManage = new List<Ec2Instance>();
             var accounts = LoadAwsAccounts(Configuration);
             foreach (var accountKey in accounts)
             {
-                var decryptedAccountKey = DecryptKeys(accountKey);
+                var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
                 var describeRequest = new DescribeInstancesRequest();
-                var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
+                var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
                 var describeResponse = await ec2Client.DescribeInstancesAsync(describeRequest);
                 ec2Client.Dispose();
                 foreach (var reservation in describeResponse.Reservations)
                 {
                     foreach (var instance in reservation.Instances)
                     {
-                        if (instance.Tags.Where(t => t.Key == decryptedAccountKey.Tag).FirstOrDefault() != null)
+                        if (instance.Tags.Where(t => t.Key == decryptedAccountKey.TagToSearch).FirstOrDefault() != null)
                         {
-                            if (Regex.Match(instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.Tag).Value, decryptedAccountKey.TagSearchString).Success)
+                            if (Regex.Match(instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.TagToSearch).Value, decryptedAccountKey.SearchString).Success)
                             {
                                 var name = instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.NameTag).Value;
-                                var ec2InstanceToManage = new AwsEc2Instance(name, instance.PrivateIpAddress, instance.InstanceId, instance.State.Name.Value, accountKey.AccountName);
+                                var ec2InstanceToManage = new Ec2Instance(name, instance.PrivateIpAddress, instance.InstanceId, instance.State.Name.Value, accountKey.AccountName);
                                 ecInstancesToManage.Add(ec2InstanceToManage);
                             }
                         }
@@ -73,26 +51,42 @@ namespace Ec2Manager.Workers
             return ecInstancesToManage.OrderBy(x => x.Name).ToList();
         }
 
-        internal static async Task StartEc2Instance(IOptions<AppConfig> Configuration, string AccountName, string InstanceId)
+        internal static void StartEc2Instance(IConfiguration Configuration, string AccountName, string InstanceId)
         {
-            var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
-            var decryptedAccountKey = DecryptKeys(accountKey);
-            var instanceIdAsList = new List<string> { InstanceId };
-            var startRequest = new StartInstancesRequest(instanceIdAsList);
-            var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
-            await ec2Client.StartInstancesAsync(startRequest);
-            ec2Client.Dispose();
+            try
+            {
+                var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
+                var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
+                var instanceIdAsList = new List<string> { InstanceId };
+                var startRequest = new StartInstancesRequest(instanceIdAsList);
+                var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
+                ec2Client.StartInstancesAsync(startRequest);
+                ec2Client.Dispose();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, InstanceId, e.Message), e.InnerException);
+            }
         }
 
-        internal static async Task RebootEc2Instance(IOptions<AppConfig> Configuration, string AccountName, string InstanceId)
+        internal static void RebootEc2Instance(IConfiguration Configuration, string AccountName, string InstanceId)
         {
-            var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
-            var decryptedAccountKey = DecryptKeys(accountKey);
-            var instanceIdAsList = new List<string> { InstanceId };
-            var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
-            var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, decryptedAccountKey.Region);
-            await ec2Client.RebootInstancesAsync(rebootRequest);
-            ec2Client.Dispose();
+            try
+            {
+                var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
+                var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
+                var instanceIdAsList = new List<string> { InstanceId };
+                var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
+                var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
+                ec2Client.RebootInstancesAsync(rebootRequest);
+                ec2Client.Dispose();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.RebootEc2InstanceError, InstanceId, e.Message), e.InnerException);
+            }
         }
     }
 }

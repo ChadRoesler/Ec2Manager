@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ec2Manager</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <img class="img-fluid mr-sm-2" src="~/images/logo.png" height="40" width="40" />
+                <a class="navbar-brand">Manager</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <div id="navbarSearch" class="navbar-search pull-right">
+                        <form class="form-inline my-2 my-lg-0" asp-action="Index" asp-controller="Home">
+                            <select class="form-control mr-sm-2" id="searchtype" name="searchtype">
+                                @if (ViewData["SearchType"].ToString() == "name")
+                                {
+                                    <option value="name" selected>Name</option>
+                                }
+                                else
+                                {
+                                    <option value="name">Name</option>
+                                }
+                                @if (ViewData["SearchType"].ToString() == "status")
+                                {
+                                    <option value="status" selected>Status</option>
+                                }
+                                else
+                                {
+                                    <option value="status">Status</option>
+                                }
+                                @if (ViewData["SearchType"].ToString() == "ipaddress")
+                                {
+                                    <option value="ipaddress" selected>Ip Address</option>
+                                }
+                                else
+                                {
+                                    <option value="ipaddress">Ip Address</option>
+                                }
+                                @if (ViewData["SearchType"].ToString() == "account")
+                                {
+                                    <option value="account" selected>Account</option>
+                                }
+                                else
+                                {
+                                    <option value="account">Account</option>
+                                }
+                                @if (ViewData["SearchType"].ToString() == "id")
+                                {
+                                    <option value="id" selected>Instance Id</option>
+                                }
+                                else
+                                {
+                                    <option value="id">Instance Id</option>
+                                }
+                            </select>
+                            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query" value="@ViewData["SearchQuery"]">
+                            <button class="btn btn-dark my-2 my-sm-0" type="submit">Search</button>
+                        </form>
+                    </div>
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Refresh List</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2019 - Chad Roesler
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

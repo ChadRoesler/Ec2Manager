@@ -1,14 +1,22 @@
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Okta.AspNetCore;
+using Microsoft.Extensions.Hosting;
+//using Okta.AspNetCore;
+using HealthChecks.UI.Client;
 using Ec2Manager.Models;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
+
+using Microsoft.IdentityModel.Tokens;
 
 namespace Ec2Manager
 {
@@ -19,9 +27,9 @@ namespace Ec2Manager
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; set; }
+        public IConfiguration Configuration { get; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -39,23 +47,42 @@ namespace Ec2Manager
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
+            services.AddHealthChecks();
             if (Configuration.GetValue<string>("Okta:OktaDomain") != null)
             {
-                services.AddAuthentication(options =>
+                services.AddAuthorizationCore();
+                services.AddAuthentication(sharedOptions =>
                 {
-                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = OktaDefaults.MvcAuthenticationScheme;
+                    sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    //sharedOptions.DefaultChallengeScheme = OktaDefaults.MvcAuthenticationScheme;
+                    sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 })
                 .AddCookie()
-                .AddOktaMvc(new OktaMvcOptions
+                .AddOpenIdConnect(options =>
                 {
-                    OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
-                    ClientId = Configuration.GetValue<string>("Okta:ClientId"),
-                    ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
-                    Scope = new List<string> { "openid", "profile", "email" }
+                    options.ClientId = Configuration["Okta:ClientId"];
+                    options.ClientSecret = Configuration["Okta:ClientSecret"];
+                    options.Authority = Configuration["Okta:OktaDomain"];
+                    options.CallbackPath = "/authorization-code/callback";
+                    options.ResponseType = "code";
+                    options.SaveTokens = true;
+                    options.UseTokenLifetime = false;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.Scope.Add("openid");
+                    options.Scope.Add("profile");
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        NameClaimType = "name"
+                    };
                 });
+                //.AddOktaMvc(new OktaMvcOptions
+                //{
+                //    OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
+                //    ClientId = Configuration.GetValue<string>("Okta:ClientId"),
+                //    ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
+                //    Scope = new List<string> { "openid", "profile", "email" }
+                //});
             }
             else
             {
@@ -66,34 +93,71 @@ namespace Ec2Manager
                         .Build();
                 });
             }
-            
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddOptions();
-            services.Configure<AppConfig>(Configuration);
+            services.AddControllersWithViews();
+            //services.AddMvc();
+            services.AddMvc(options => { options.EnableEndpointRouting = false; }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory log)
         {
+            log.AddLog4Net();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-              
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+                app.UseDeveloperExceptionPage();
+                //app.UseStatusCodePages();
+                //app.UseMiddleware<ErrorHandler>();
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
+            app.UseHealthChecks("/healthcheck", new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+            app.UseRouting();
+            app.UseAuthorization();
             if (Configuration.GetValue<string>("Okta:OktaDomain") != null)
             {
                 app.UseAuthentication();
             }
-            app.UseMvc();
+
+            ///////////////////////////////////////////
+            /// Commented out until Okta asp.net 3.0
+            /////////////////////////////////////////
+
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllerRoute(
+            //        name: "default",
+            //        pattern: "{controller=Home}/{action=Index}/{id?}");
+            //    endpoints.MapControllerRoute(name: "Error",
+            //                                        "error",
+            //                                        new { controller = "Home", action = "Error" });
+
+            //    endpoints.MapControllerRoute(name: "PageNotFound",
+            //                                    "pagenotfound",
+            //                                    new { controller = "Home", action = "PageNotFound" });
+            //});
+            app.UseMvc(routes =>
+            {
+
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute(name: "Error",
+                                    "error",
+                                    new { controller = "Home", action = "Error" });
+                routes.MapRoute(name: "PageNotFound",
+                                                "pagenotfound",
+                                                new { controller = "Home", action = "PageNotFound" });
+            });
         }
     }
 }

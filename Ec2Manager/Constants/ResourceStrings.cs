@@ -1,7 +1,8 @@
 ﻿namespace Ec2Manager.Constants
 {
-    public class ResourceStrings
+    internal class ResourceStrings
     {
+        internal const string UserClaimUserName = "preferred_username";
         internal const string LanguageType = "CSharp";
         internal const string KeyFileName = "{0}.dll";
         internal const string KeyType = "Ec2Manager.CryptographyManagement";
@@ -12,26 +13,8 @@ SecretKey: {1}
 KeyFilePath: {2}
 ==============================================";
         internal const string AppSettingsAddition = @"==============[AppSetting Value]==============
-      {{
-        ""AccessKeyHash"": ""{0}"",
-        ""NameTag"": ""NameOfTagForNameColumnHere"",
-        ""Name"": ""{2}"",
-        ""Region"": ""RegionHere"",
-        ""SecretKeyHash"": ""{1}"",
-        ""TagSearchString"": ""."",
-        ""TagToSearch"": ""TagToSearchHere""
-      }}
+{0)
 ==============================================
-";
-        internal const string AppSettingsPowershellAddition = @"{{
-    ""AccessKeyHash"": ""{0}"",
-    ""NameTag"": ""NameOfTagForNameColumnHere"",
-    ""Name"": ""{2}"",
-    ""Region"": ""RegionHere"",
-    ""SecretKeyHash"": ""{1}"",
-    ""TagSearchString"": ""."",
-    ""TagToSearch"": ""TagToSearchHere""
-}}
 ";
         internal const string KeyGenerationCode = @"using System;
 using System.IO;

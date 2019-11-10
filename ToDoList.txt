@@ -1,0 +1,8 @@
+Log more!
+	Debug all over
+	Info where when doing stuff
+	Error status codes
+	Fatal on exceptions
+
+Figure out Results per page - NOPE
+Figure out OIDC in okta, so i can trash all 2.2 dependencies.
