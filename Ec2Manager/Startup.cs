@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,8 +13,6 @@ using Okta.AspNetCore;
 using HealthChecks.UI.Client;
 using Ec2Manager.Models;
 using Microsoft.Extensions.Logging;
-
-using Microsoft.IdentityModel.Tokens;
 
 namespace Ec2Manager
 {
@@ -82,7 +78,7 @@ namespace Ec2Manager
                     ClientId = Configuration.GetValue<string>("Okta:ClientId"),
                     ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
                     Scope = new List<string> { "openid", "profile", "email" }
-                });
+                });           
             }
             else
             {
@@ -94,7 +90,6 @@ namespace Ec2Manager
                 });
             }
             services.AddControllersWithViews();
-            //services.AddMvc();
             services.AddMvc(options => { options.EnableEndpointRouting = false; }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
@@ -108,11 +103,12 @@ namespace Ec2Manager
             }
             else
             {
-                app.UseStatusCodePages();
-                app.UseMiddleware<ErrorHandler>();
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                
             }
+            app.UseHsts();
+            app.UseStatusCodePages();
+            app.UseMiddleware<ErrorHandler>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseHealthChecks("/healthcheck", new HealthCheckOptions
