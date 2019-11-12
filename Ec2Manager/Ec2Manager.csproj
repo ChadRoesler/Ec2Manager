@@ -5,16 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.0.1" />
     <PackageReference Include="AWSSDK.EC2" Version="3.3.134.9" />
     <PackageReference Include="CommandLineParser" Version="2.6.0" />
     <PackageReference Include="HybridScaffolding" Version="1.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="3.0.3" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
-    <PackageReference Include="Okta.Sdk" Version="1.4.1" />
+    <PackageReference Include="Okta.AspNetCore" Version="1.3.0" />
     <PackageReference Include="PagedList.Core" Version="1.17.4" />
     <PackageReference Include="PagedList.Core.Mvc" Version="3.0.0" />
     <PackageReference Include="System.CodeDom" Version="4.6.0" />
