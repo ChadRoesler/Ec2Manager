@@ -33,10 +33,6 @@ namespace Ec2Manager
             var fileCreateTime = File.GetCreationTime(assemblyPath);
             using (var aesEncryption = new AesManaged())
             {{
-                aesEncryption.BlockSize = 128;
-                aesEncryption.KeySize = 128;
-                aesEncryption.Padding = PaddingMode.PKCS7;
-                aesEncryption.Mode = CipherMode.CBC;
                 aesEncryption.Key = Convert.FromBase64String(""{0}"");
                 aesEncryption.IV = Convert.FromBase64String(""{1}"");
                 var decryptor = aesEncryption.CreateDecryptor(aesEncryption.Key, aesEncryption.IV);

@@ -28,10 +28,6 @@ namespace Ec2Manager.Workers
             var stringDateTime = createdDateTime.ToString();
             using (var aesEncryption = new AesManaged())
             {
-                aesEncryption.BlockSize = 128;
-                aesEncryption.KeySize = 128;
-                aesEncryption.Padding = PaddingMode.PKCS7;
-                aesEncryption.Mode = CipherMode.CBC;
                 aesEncryption.GenerateKey();
                 aesEncryption.GenerateIV();
                 keyByteString = Convert.ToBase64String(aesEncryption.Key);
