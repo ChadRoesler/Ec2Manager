@@ -29,7 +29,8 @@ namespace Ec2Manager.Controllers
         public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder)
         {
             var userClaims = HttpContext.User.Claims;
-            var username = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault().Value;
+            var userClaim = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
+            var username = userClaim == null ? "NoOktaAuth" : userClaim.Value;
             _logger.LogInformation(string.Format(MessageStrings.LoadingInstances, username));
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
             _logger.LogInformation(string.Format(MessageStrings.InitialInstanceCount, instances.Count));
@@ -45,7 +46,8 @@ namespace Ec2Manager.Controllers
         public IActionResult Enable(string Id, string account, string searchtype, string query, int? page, string sortorder, string  pagesize)
         {
             var userClaims = HttpContext.User.Claims;
-            var username = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault().Value;
+            var userClaim = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
+            var username = userClaim == null ? "NoOktaAuth" : userClaim.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserEnable, username, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             InstanceManagement.StartEc2Instance(_configuration, account, Id);
@@ -58,7 +60,8 @@ namespace Ec2Manager.Controllers
         public IActionResult Reboot(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaims = HttpContext.User.Claims;
-            var username = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault().Value;
+            var userClaim = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
+            var username = userClaim == null ? "NoOktaAuth" : userClaim.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserEnable, username, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             InstanceManagement.RebootEc2Instance(_configuration, account, Id);
