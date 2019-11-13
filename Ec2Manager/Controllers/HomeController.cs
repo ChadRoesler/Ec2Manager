@@ -29,9 +29,10 @@ namespace Ec2Manager.Controllers
         public async Task<IActionResult> IndexAsync(string searchtype, string query, int? page, string sortorder)
         {
             var userClaims = HttpContext.User.Claims;
-            var userClaim = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
-            var username = userClaim == null ? "NoOktaAuth" : userClaim.Value;
-            _logger.LogInformation(string.Format(MessageStrings.LoadingInstances, username));
+            var userClaimName = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
+            var userName = userClaimName == null ? "NoOktaAuth" : userClaimName.Value;
+            _logger.LogInformation($"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}");
+            _logger.LogInformation(string.Format(MessageStrings.LoadingInstances, userName));
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
             _logger.LogInformation(string.Format(MessageStrings.InitialInstanceCount, instances.Count));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
@@ -46,12 +47,12 @@ namespace Ec2Manager.Controllers
         public IActionResult Enable(string Id, string account, string searchtype, string query, int? page, string sortorder, string  pagesize)
         {
             var userClaims = HttpContext.User.Claims;
-            var userClaim = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
-            var username = userClaim == null ? "NoOktaAuth" : userClaim.Value;
-            _logger.LogInformation(string.Format(MessageStrings.UserEnable, username, Id));
+            var userClaimName = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
+            var userName = userClaimName == null ? "NoOktaAuth" : userClaimName.Value;
+            _logger.LogInformation(string.Format(MessageStrings.UserEnable, userName, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             InstanceManagement.StartEc2Instance(_configuration, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserEnableSuccess, username, Id));
+            _logger.LogInformation(string.Format(MessageStrings.UserEnableSuccess, userName, Id));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
 
         }
@@ -60,12 +61,12 @@ namespace Ec2Manager.Controllers
         public IActionResult Reboot(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaims = HttpContext.User.Claims;
-            var userClaim = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
-            var username = userClaim == null ? "NoOktaAuth" : userClaim.Value;
-            _logger.LogInformation(string.Format(MessageStrings.UserEnable, username, Id));
+            var userClaimName = userClaims.Where(x => x.Type == ResourceStrings.UserClaimUserName).FirstOrDefault();
+            var userName = userClaimName == null ? "NoOktaAuth" : userClaimName.Value;
+            _logger.LogInformation(string.Format(MessageStrings.UserEnable, userName, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             InstanceManagement.RebootEc2Instance(_configuration, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserRebootSuccess, username, Id));
+            _logger.LogInformation(string.Format(MessageStrings.UserRebootSuccess, userName, Id));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
 
