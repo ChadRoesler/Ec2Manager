@@ -21,10 +21,7 @@ namespace Ec2Manager.Models.DataManagement
         public SearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
         {
             var masterAccountList = new List<string>();
-            foreach(var claimValue in claimValueData)
-            {
-                masterAccountList.AddRange(claimValue.Accounts);
-            }
+            claimValueData.ToList().ForEach(x => masterAccountList.AddRange(x.Accounts));
             if(string.IsNullOrWhiteSpace(searchType))
             {
                 searchType = "name";
@@ -90,6 +87,8 @@ namespace Ec2Manager.Models.DataManagement
                     searchHits = searchHits.OrderBy(x => x.Name);
                     break;
             }
+
+            searchHits.ToList().ForEach(x => x.CanReboot = claimValueData.SingleOrDefault(x => x.EnableReboot) != null);
 
             var searchResult = new SearchResult()
             {
