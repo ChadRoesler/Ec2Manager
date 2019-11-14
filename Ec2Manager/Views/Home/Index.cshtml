@@ -32,13 +32,13 @@
                 <th>
                     @if (Model.SortOrder == "name")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="name_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="name">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
                         </a>
                     }
@@ -46,13 +46,13 @@
                 <th>
                     @if (Model.SortOrder == "account")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="account_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="account">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
                         </a>
                     }
@@ -60,13 +60,13 @@
                 <th>
                     @if (Model.SortOrder == "status")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="status_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="status">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
                         </a>
                     }
@@ -75,13 +75,13 @@
                 <th>
                     @if (Model.SortOrder == "ipaddress")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="ipaddress_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="ipaddress">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
                         </a>
                     }
@@ -89,17 +89,19 @@
                 <th>
                     @if (Model.SortOrder == "id")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="id_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery"  asp-route-sortorder="id">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
                         </a>
                     }
 
+                </th>
+                <th>
                 </th>
             </tr>
         </thead>
@@ -130,7 +132,7 @@
                         {
                             <a asp-action="Enable" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page"  asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
                         }
-                        @if (item.CanReboot && @item.Status.Equals("running"))
+                        @if (@item.CanReboot && @item.Status.Equals("running"))
                         {
                             <a asp-action="Reboot" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page"  asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Reboot</a>
                         }
