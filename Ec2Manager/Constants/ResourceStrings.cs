@@ -13,7 +13,7 @@ SecretKey: {1}
 KeyFilePath: {2}
 ==============================================";
         internal const string AppSettingsAddition = @"==============[AppSetting Value]==============
-{0)
+{0}
 ==============================================
 ";
         internal const string KeyGenerationCode = @"using System;

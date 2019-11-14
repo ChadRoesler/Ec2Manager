@@ -21,5 +21,7 @@ namespace Ec2Manager.Models.CommandLine
         public string SearchString { get; set; }
         [Option('o', "OutputDirectory", HelpText = "The Directory to place the KeyFile", Required = true)]
         public string OutputDirectory { get; set; }
+        [Option('z', "AppSettingOnly", HelpText = "Only Output the appsettings.json value", Required = false, Default = false)]
+        public bool AppSettingOnly { get; set; }
     }
 }

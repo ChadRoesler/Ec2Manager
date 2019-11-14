@@ -19,6 +19,7 @@ namespace Ec2Manager.Models.DataManagement
         {
             var result = Parser.Default.ParseArguments<EncryptCommand>(arguments)
                 .WithParsed((EncryptCommand encrypt) => {
+                    runType = encrypt.AppSettingOnly ? RunTypes.Powershell : runType;
                     KeyCryptography.EncryptKeys(encrypt, encrypt.OutputDirectory, runType);
                 });
             base.ConsoleMain(arguments, runType);
