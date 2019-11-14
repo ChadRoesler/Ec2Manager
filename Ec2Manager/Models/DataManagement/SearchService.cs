@@ -22,10 +22,9 @@ namespace Ec2Manager.Models.DataManagement
         {
             var masterAccountList = new List<string>();
             claimValueData.ToList().ForEach(x => masterAccountList.AddRange(x.Accounts));
-            if(string.IsNullOrWhiteSpace(searchType))
-            {
-                searchType = "name";
-            }
+            searchType = string.IsNullOrWhiteSpace(searchType) ? "name" : searchType;
+            sortOrder = string.IsNullOrWhiteSpace(sortOrder) ? "name" : sortOrder;
+            query = string.IsNullOrWhiteSpace(query) ? "" : query;
             var searchHits = searchData.Where(x => masterAccountList.Contains(x.Account));
             if (!string.IsNullOrWhiteSpace(query))
             {
@@ -49,14 +48,6 @@ namespace Ec2Manager.Models.DataManagement
                         break;
                 }
                 
-            }
-            else
-            {
-                query = "";
-            }
-            if(string.IsNullOrWhiteSpace(sortOrder))
-            {
-                sortOrder = "name";
             }
             
             switch (sortOrder.ToLower())
@@ -87,7 +78,6 @@ namespace Ec2Manager.Models.DataManagement
                     searchHits = searchHits.OrderBy(x => x.Name);
                     break;
             }
-
             searchHits.ToList().ForEach(x => x.CanReboot = claimValueData.SingleOrDefault(x => x.EnableReboot) != null);
 
             var searchResult = new SearchResult()
