@@ -130,7 +130,7 @@
                         {
                             <a asp-action="Enable" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page"  asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
                         }
-                        @if (@Configuration.GetValue<bool>("Ec2Manager:EnableRebootFunction") && @item.Status.Equals("running"))
+                        @if (item.CanReboot && @item.Status.Equals("running"))
                         {
                             <a asp-action="Reboot" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page"  asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Reboot</a>
                         }

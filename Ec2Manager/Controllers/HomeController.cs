@@ -45,7 +45,7 @@ namespace Ec2Manager.Controllers
             }
             else
             {
-                claimAccounts.Add( new ClaimValueAccount { Value = "NoAuth", Accounts = InstanceManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName) });
+                claimAccounts.Add(new ClaimValueAccount { Value = "NoAuth", Accounts = InstanceManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName), EnableReboot = _configuration.GetValue<bool>("Ec2Manager:EnableReboot") });
             }
             var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
             _logger.LogInformation(string.Format(MessageStrings.InitialInstanceCount, instances.Count));
