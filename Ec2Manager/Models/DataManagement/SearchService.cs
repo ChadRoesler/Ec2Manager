@@ -3,26 +3,33 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using PagedList.Core;
 using Ec2Manager.Interfaces;
-using System;
+using Ec2Manager.Models.ConfigManagement;
 
 namespace Ec2Manager.Models.DataManagement
 {
     public class SearchService : ISearchService
     {
         private readonly IEnumerable<Ec2Instance> searchData = new List<Ec2Instance>();
+        private readonly IEnumerable<ClaimValueAccount> claimValueData = new List<ClaimValueAccount>();
 
-        public SearchService(IEnumerable<Ec2Instance> ec2Instances)
+        public SearchService(IEnumerable<Ec2Instance> ec2Instances, IEnumerable<ClaimValueAccount> claimValueAccounts)
         {
             searchData = ec2Instances;
+            claimValueData = claimValueAccounts;
         }
 
         public SearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
         {
+            var masterAccountList = new List<string>();
+            foreach(var claimValue in claimValueData)
+            {
+                masterAccountList.AddRange(claimValue.Accounts);
+            }
             if(string.IsNullOrWhiteSpace(searchType))
             {
                 searchType = "name";
             }
-            var searchHits = searchData;
+            var searchHits = searchData.Where(x => masterAccountList.Contains(x.Account));
             if (!string.IsNullOrWhiteSpace(query))
             {
                 switch (searchType.ToLower())

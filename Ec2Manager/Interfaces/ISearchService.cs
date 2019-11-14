@@ -1,4 +1,6 @@
-﻿using Ec2Manager.Models.DataManagement;
+﻿using System.Collections.Generic;
+using Ec2Manager.Models.DataManagement;
+using Ec2Manager.Models.ConfigManagement;
 
 namespace Ec2Manager.Interfaces
 {

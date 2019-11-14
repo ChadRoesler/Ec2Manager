@@ -14,6 +14,7 @@ using HealthChecks.UI.Client;
 using Ec2Manager.Models;
 using Microsoft.Extensions.Logging;
 
+
 namespace Ec2Manager
 {
     public class Startup
@@ -77,7 +78,7 @@ namespace Ec2Manager
                     OktaDomain = Configuration.GetValue<string>("Okta:OktaDomain"),
                     ClientId = Configuration.GetValue<string>("Okta:ClientId"),
                     ClientSecret = Configuration.GetValue<string>("Okta:ClientSecret"),
-                    Scope = new List<string> { "openid", "profile", "email" }
+                    Scope = Configuration.GetValue<List<string>>("Okta:ClientScopes")
                 });           
             }
             else
@@ -104,11 +105,11 @@ namespace Ec2Manager
             else
             {
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                
+                app.UseHsts();
+                app.UseStatusCodePages();
+                app.UseMiddleware<ErrorHandler>();
             }
-            app.UseHsts();
-            app.UseStatusCodePages();
-            app.UseMiddleware<ErrorHandler>();
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseHealthChecks("/healthcheck", new HealthCheckOptions

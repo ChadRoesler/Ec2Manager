@@ -20,29 +20,17 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <img class="img-fluid mr-sm-2" src="~/images/logo.png" height="40" width="40" />
-                <a class="navbar-brand">Manager</a>
+                <a class="navbar-brand" >Manager</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <div id="navbarSearch" class="navbar-search pull-right">
-                        <form class="form-inline my-2 my-lg-0" method="get" asp-controller="Home">
-                            <select class="form-control mr-sm-2" id="searchtype" name="searchtype">
-                                <option value="name">Name</option>
-                                <option value="status">Status</option>
-                                <option value="ipaddress">Ip Address</option>
-                                <option value="account">Account</option>
-                                <option value="id">Instance Id</option>
-                            </select>
-                            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query">
-                            <button class="btn btn-dark my-2 my-sm-0" type="submit">Search</button>
-                        </form>
+                       
                     </div>
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Refresh List</a>
-                        </li>
+                      
                     </ul>
                 </div>
             </div>

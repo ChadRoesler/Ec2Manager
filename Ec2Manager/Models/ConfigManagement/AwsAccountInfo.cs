@@ -1,8 +1,8 @@
 ﻿using Ec2Manager.Interfaces;
 
-namespace Ec2Manager.Models.DataManagement
+namespace Ec2Manager.Models.ConfigManagement
 {
-    public class AwsAccountInfoModel : IAwsAccountInfo
+    public class AwsAccountInfo : IAwsAccountInfo
     {
         public string AccountName { get; set; }
         public string Region { get; set; }

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Ec2Manager.Constants;
+using Ec2Manager.Models.ConfigManagement;
 using Ec2Manager.Models.DataManagement;
 using Microsoft.Extensions.Configuration;
 using Amazon;
@@ -14,9 +15,14 @@ namespace Ec2Manager.Workers
 {
     public static class InstanceManagement
     {
-        internal static IList<AwsAccountInfoModel> LoadAwsAccounts(IConfiguration Configuration)
+        internal static IEnumerable<ClaimValueAccount> LoadClaimValueAccounts(IConfiguration Configuration)
         {
-            var awsKeys = Configuration.GetSection("Ec2Manager:Accounts").Get<IList<AwsAccountInfoModel>>();
+            var claimAccounts = Configuration.GetSection("Okta:ClaimValueAccounts").Get<IEnumerable<ClaimValueAccount>>();
+            return claimAccounts;
+        }
+        internal static IEnumerable<AwsAccountInfo> LoadAwsAccounts(IConfiguration Configuration)
+        {
+            var awsKeys = Configuration.GetSection("Ec2Manager:Accounts").Get<IEnumerable<AwsAccountInfo>>();
             return awsKeys;
         }
 
@@ -55,7 +61,7 @@ namespace Ec2Manager.Workers
         {
             try
             {
-                var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
+                var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
                 var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
                 var instanceIdAsList = new List<string> { InstanceId };
@@ -74,7 +80,7 @@ namespace Ec2Manager.Workers
         {
             try
             {
-                var accountKey = LoadAwsAccounts(Configuration).Where(x => x.AccountName == AccountName).FirstOrDefault();
+                var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
                 var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
                 var instanceIdAsList = new List<string> { InstanceId };

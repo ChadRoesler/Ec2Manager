@@ -25,11 +25,6 @@ namespace Ec2Manager.Models
                     case 404:
                         HandlePageNotFound(context);
                         break;
-
-                    case 418:
-                        //  Not implemented
-                        break;
-
                     default:
                         break;
                 }
