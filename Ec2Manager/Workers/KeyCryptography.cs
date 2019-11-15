@@ -16,7 +16,7 @@ namespace Ec2Manager.Workers
 {
     public static class KeyCryptography
     {
-        internal static void EncryptKeys(IAwsAccountInfo AwsAccountInfo, string OutputDirectory, RunTypes RunType)
+        internal static void EncryptKeys(IAwsAccountInfo AwsAccountInfo, string OutputDirectory, RunTypes RunType, bool AppSettingsOnly)
         {
             var keyByteString = string.Empty;
             var initializationVectorByteString = string.Empty;
@@ -100,7 +100,10 @@ namespace Ec2Manager.Workers
                 }
                 else
                 {
-                    Console.WriteLine(keyInfo);
+                    if (!AppSettingsOnly)
+                    {
+                        Console.WriteLine(keyInfo);
+                    }
                     var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, awsAccountInfoJson);
                     Console.WriteLine(appSettingsInfo);
                 }
