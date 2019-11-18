@@ -104,9 +104,13 @@ namespace Ec2Manager.Workers
                     if (!AppSettingsOnly)
                     {
                         Console.WriteLine(keyInfo);
+                        var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, awsAccountInfoJson);
+                        Console.WriteLine(appSettingsInfo);
                     }
-                    var appSettingsInfo = string.Format(ResourceStrings.AppSettingsAddition, awsAccountInfoJson);
-                    Console.WriteLine(appSettingsInfo);
+                    else
+                    {
+                        Console.WriteLine(awsAccountInfoJson);
+                    }
                 }
             }
         }
