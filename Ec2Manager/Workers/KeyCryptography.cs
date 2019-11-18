@@ -11,6 +11,7 @@ using HybridScaffolding.Enums;
 using Newtonsoft.Json;
 using Ec2Manager.Constants;
 using Ec2Manager.Interfaces;
+using Ec2Manager.Models.ConfigManagement;
 
 namespace Ec2Manager.Workers
 {
@@ -93,7 +94,7 @@ namespace Ec2Manager.Workers
                 File.SetCreationTime(outputPath, createdDateTime);
                 File.SetLastWriteTime(outputPath, modifiedDateTime);
                 var keyInfo = string.Format(ResourceStrings.EncryptedKeys, AwsAccountInfo.AccessKey, AwsAccountInfo.SecretKey, outputPath);
-                var awsAccountInfoJson = JsonConvert.SerializeObject(AwsAccountInfo,Formatting.Indented);
+                var awsAccountInfoJson = JsonConvert.SerializeObject(new AwsAccountInfo(AwsAccountInfo), Formatting.Indented);
                 if (RunType == RunTypes.Powershell)
                 {
                     Console.WriteLine(awsAccountInfoJson);
