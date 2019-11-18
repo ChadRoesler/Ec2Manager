@@ -44,9 +44,9 @@ namespace Ec2Manager.Workers
                     {
                         if (instance.Tags.Where(t => t.Key == decryptedAccountKey.TagToSearch).FirstOrDefault() != null)
                         {
-                            if (Regex.Match(instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.TagToSearch).Value, decryptedAccountKey.SearchString).Success)
+                            if (Regex.Match(instance.Tags.SingleOrDefault(t => t.Key == decryptedAccountKey.TagToSearch)?.Value, decryptedAccountKey.SearchString).Success)
                             {
-                                var name = instance.Tags.FirstOrDefault(t => t.Key == decryptedAccountKey.NameTag).Value;
+                                var name = instance.Tags.SingleOrDefault(t => t.Key == decryptedAccountKey.NameTag)?.Value;
                                 var ec2InstanceToManage = new Ec2Instance(name, instance.PrivateIpAddress, instance.InstanceId, instance.State.Name.Value, accountKey.AccountName);
                                 ecInstancesToManage.Add(ec2InstanceToManage);
                             }
