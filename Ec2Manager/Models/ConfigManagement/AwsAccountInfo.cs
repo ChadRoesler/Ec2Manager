@@ -11,16 +11,5 @@ namespace Ec2Manager.Models.ConfigManagement
         public string TagToSearch { get; set; }
         public string SearchString { get; set; }
         public string NameTag { get; set; }
-
-        internal AwsAccountInfo(IAwsAccountInfo awsAccountInfo)
-        {
-            AccountName = awsAccountInfo.AccountName;
-            Region = awsAccountInfo.Region;
-            AccessKey = awsAccountInfo.AccessKey;
-            SecretKey = awsAccountInfo.SecretKey;
-            TagToSearch = awsAccountInfo.TagToSearch;
-            SearchString = awsAccountInfo.SearchString;
-            NameTag = awsAccountInfo.NameTag;
-        }
     }
 }

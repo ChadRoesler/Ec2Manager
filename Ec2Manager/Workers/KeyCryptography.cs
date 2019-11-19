@@ -94,7 +94,17 @@ namespace Ec2Manager.Workers
                 File.SetCreationTime(outputPath, createdDateTime);
                 File.SetLastWriteTime(outputPath, modifiedDateTime);
                 var keyInfo = string.Format(ResourceStrings.EncryptedKeys, AwsAccountInfo.AccessKey, AwsAccountInfo.SecretKey, outputPath);
-                var awsAccountInfoJson = JsonConvert.SerializeObject(new AwsAccountInfo(AwsAccountInfo), Formatting.Indented);
+                var AccountInfo = new AwsAccountInfo()
+                {
+                    AccountName = AwsAccountInfo.AccountName,
+                    Region = AwsAccountInfo.Region,
+                    AccessKey = AwsAccountInfo.AccessKey,
+                    SecretKey = AwsAccountInfo.SecretKey,
+                    NameTag = AwsAccountInfo.NameTag,
+                    TagToSearch = AwsAccountInfo.TagToSearch,
+                    SearchString = AwsAccountInfo.SearchString
+                };
+                var awsAccountInfoJson = JsonConvert.SerializeObject(AccountInfo, Formatting.Indented);
                 if (RunType == RunTypes.Powershell)
                 {
                     Console.WriteLine(awsAccountInfoJson);
