@@ -1,16 +1,20 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Ec2Manager.Models
 {
     public class ErrorHandler
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorHandler> _logger;
 
-        public ErrorHandler(RequestDelegate next)
+        public ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
         {
             _next = next;
+            _logger = logger;
+
         }
 
         public async Task Invoke(HttpContext context)
@@ -18,7 +22,7 @@ namespace Ec2Manager.Models
             try
             {
                 await _next(context);
-
+                _logger.LogError(context.Request.Path.ToString().TrimStart('/'));
                 //  Handle specific HTTP status codes
                 switch (context.Response.StatusCode)
                 {
@@ -31,6 +35,7 @@ namespace Ec2Manager.Models
             }
             catch (Exception e)
             {
+                _logger.LogError($"{e}");
                 //  Handle uncaught global exceptions (treat as 500 error)
                 HandleException(context, e);
             }
