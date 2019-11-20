@@ -17,10 +17,23 @@ namespace Ec2Manager.Models.DataManagement
 
         public override void ConsoleMain(string[] arguments, RunTypes runType)
         {
-            var result = Parser.Default.ParseArguments<EncryptCommand>(arguments)
-                .WithParsed((EncryptCommand encrypt) => {
-                    KeyCryptography.EncryptKeys(encrypt, encrypt.OutputDirectory, runType, encrypt.AppSettingOnly);
-                });
+            if (arguments == null || arguments.Length == 0)
+            {
+                var hostBuilder = Host.CreateDefaultBuilder(arguments)
+               .ConfigureWebHostDefaults(webBuilder =>
+               {
+                   webBuilder.UseStartup<Startup>();
+               });
+               hostBuilder.Build().Run();
+            }
+            else
+            {
+                var result = Parser.Default.ParseArguments<EncryptCommand>(arguments)
+                    .WithParsed((EncryptCommand encrypt) =>
+                    {
+                        KeyCryptography.EncryptKeys(encrypt, encrypt.OutputDirectory, runType, encrypt.AppSettingOnly);
+                    });
+            }
             base.ConsoleMain(arguments, runType);
         }
 
