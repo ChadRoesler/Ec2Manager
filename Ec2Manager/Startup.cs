@@ -97,11 +97,11 @@ namespace Ec2Manager
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
             });
             app.UseRouting();
-            app.UseAuthorization();
             if (Configuration["Okta:OktaDomain"] != null)
             {
                 app.UseAuthentication();
             }
+            app.UseAuthorization();
 
             ///////////////////////////////////////////
             /// Commented out until Okta asp.net 3.0
