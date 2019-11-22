@@ -32,26 +32,33 @@ namespace Ec2Manager.Workers
             var accounts = LoadAwsAccounts(Configuration);
             foreach (var accountKey in accounts)
             {
-                var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
-                var describeRequest = new DescribeInstancesRequest();
-                var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
-                var describeResponse = await ec2Client.DescribeInstancesAsync(describeRequest);
-                ec2Client.Dispose();
-                foreach (var reservation in describeResponse.Reservations)
+                try
                 {
-                    foreach (var instance in reservation.Instances)
+                    var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                    var decryptedAccountKey = KeyCryptography.DecryptKeys(accountKey);
+                    var describeRequest = new DescribeInstancesRequest();
+                    var ec2Client = new AmazonEC2Client(decryptedAccountKey.AccessKey, decryptedAccountKey.SecretKey, accountRegion);
+                    var describeResponse = await ec2Client.DescribeInstancesAsync(describeRequest);
+                    ec2Client.Dispose();
+                    foreach (var reservation in describeResponse.Reservations)
                     {
-                        if (instance.Tags.Where(t => t.Key == decryptedAccountKey.TagToSearch).FirstOrDefault() != null)
+                        foreach (var instance in reservation.Instances)
                         {
-                            if (Regex.Match(instance.Tags.SingleOrDefault(t => t.Key == decryptedAccountKey.TagToSearch)?.Value, decryptedAccountKey.SearchString).Success)
+                            if (instance.Tags.Where(t => t.Key == decryptedAccountKey.TagToSearch).FirstOrDefault() != null)
                             {
-                                var name = instance.Tags.SingleOrDefault(t => t.Key == decryptedAccountKey.NameTag)?.Value;
-                                var ec2InstanceToManage = new Ec2Instance(name, instance.PrivateIpAddress, instance.InstanceId, instance.State.Name.Value, accountKey.AccountName);
-                                ecInstancesToManage.Add(ec2InstanceToManage);
+                                if (Regex.Match(instance.Tags.SingleOrDefault(t => t.Key == decryptedAccountKey.TagToSearch)?.Value, decryptedAccountKey.SearchString).Success)
+                                {
+                                    var name = instance.Tags.SingleOrDefault(t => t.Key == decryptedAccountKey.NameTag)?.Value;
+                                    var ec2InstanceToManage = new Ec2Instance(name, instance.PrivateIpAddress, instance.InstanceId, instance.State.Name.Value, accountKey.AccountName);
+                                    ecInstancesToManage.Add(ec2InstanceToManage);
+                                }
                             }
                         }
                     }
+                }
+                catch(Exception ex)
+                {
+                    throw new Exception(string.Format(ErrorStrings.ErrorLoadingAccount, accountKey.AccountName, ex.Message), ex);
                 }
             }
             return ecInstancesToManage.OrderBy(x => x.Name).ToList();
