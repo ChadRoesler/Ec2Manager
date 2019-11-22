@@ -49,8 +49,10 @@ namespace Ec2Manager
                     options.ClientSecret = Configuration["Okta:ClientSecret"];
                     options.ResponseType = OpenIdConnectResponseType.Code;
                     options.GetClaimsFromUserInfoEndpoint = true;
-                    options.Scope.Add("openid");
-                    options.Scope.Add("profile");
+                    foreach(var scope in Configuration.GetSection("Okta:ClientScopes").Get<List<string>>())
+                    {
+                        options.Scope.Add(scope);
+                    }
                     options.SaveTokens = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
