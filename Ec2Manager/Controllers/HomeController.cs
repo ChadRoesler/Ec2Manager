@@ -41,13 +41,13 @@ namespace Ec2Manager.Controllers
                 var userAccounts = new List<string>();
                 userAccounts.AddRange(userClaimAccountManagement.Select(x => x.Value));
                 _logger.LogInformation(string.Format(MessageStrings.UserAccountManagment, userClaimPreferredUserNameValue, string.Join(", ", userAccounts)));
-                claimAccounts = InstanceManagement.LoadClaimValueAccounts(_configuration).Where(x => userAccounts.Contains(x.Value)).ToList();
+                claimAccounts = AwsManagement.LoadClaimValueAccounts(_configuration).Where(x => userAccounts.Contains(x.Value)).ToList();
             }
             else
             {
-                claimAccounts.Add(new ClaimValueAccount { Value = "NoAuth", Accounts = InstanceManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName), EnableReboot = _configuration.GetValue<bool>("Ec2Manager:EnableReboot") });
+                claimAccounts.Add(new ClaimValueAccount { Value = "NoAuth", Accounts = AwsManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName), EnableReboot = _configuration.GetValue<bool>("Ec2Manager:EnableReboot") });
             }
-            var instances = await InstanceManagement.ListEc2InstancesAsync(_configuration);
+            var instances = await AwsManagement.ListEc2InstancesAsync(_configuration);
             _logger.LogInformation(string.Format(MessageStrings.InitialInstanceCount, instances.Count));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var search = new SearchService(instances, claimAccounts);
@@ -58,26 +58,26 @@ namespace Ec2Manager.Controllers
 
 
         [Authorize]
-        public IActionResult Enable(string Id, string account, string searchtype, string query, int? page, string sortorder, string  pagesize)
+        public async Task<IActionResult> EnableAsync(string Id, string account, string searchtype, string query, int? page, string sortorder, string  pagesize)
         {
             var userClaims = HttpContext.User.Claims;
             var userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserEnable, userClaimPreferredUserNameValue, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            InstanceManagement.StartEc2Instance(_configuration, account, Id);
+            await AwsManagement.StartEc2InstanceAsync(_configuration, account, Id);
             _logger.LogInformation(string.Format(MessageStrings.UserEnableSuccess, userClaimPreferredUserNameValue, Id));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
 
         }
 
         [Authorize]
-        public IActionResult Reboot(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
+        public async Task<IActionResult> RebootAsync(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaims = HttpContext.User.Claims;
             var userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserEnable, userClaimPreferredUserNameValue, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            InstanceManagement.RebootEc2Instance(_configuration, account, Id);
+            await AwsManagement.RebootEc2InstanceAsync(_configuration, account, Id);
             _logger.LogInformation(string.Format(MessageStrings.UserRebootSuccess, userClaimPreferredUserNameValue, Id));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
