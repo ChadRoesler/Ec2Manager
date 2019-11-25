@@ -29,27 +29,27 @@ namespace Ec2Manager.Workers
             return awsKeys;
         }
 
-        internal static async Task<string> GetSecretKeyFromKmsAsync(IAwsAccountInfo AwsAccountInfo)
+        internal static async Task<string> GetSecretKeyAsync(IAwsAccountInfo AwsAccountInfo)
         {
-            var kmsSecret = string.Empty;
+            var secretsManagerSecret = string.Empty;
             try
             {
                 var accountRegion = RegionEndpoint.GetBySystemName(AwsAccountInfo.Region);
-                var kmsClient = new AmazonSecretsManagerClient(accountRegion);
-                var kmsRequest = new GetSecretValueRequest()
+                var secretsManagerClient = new AmazonSecretsManagerClient(accountRegion);
+                var secretsManagerRequest = new GetSecretValueRequest()
                 {
-                    SecretId = AwsAccountInfo.KmsName
+                    SecretId = AwsAccountInfo.SecretName
                 };
-                var kmsResponse = await kmsClient.GetSecretValueAsync(kmsRequest);
-                kmsSecret = kmsResponse.SecretString;
-                kmsClient.Dispose();
+                var secretsManagerResponse = await secretsManagerClient.GetSecretValueAsync(secretsManagerRequest);
+                secretsManagerSecret = secretsManagerResponse.SecretString;
+                secretsManagerClient.Dispose();
                 
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format(ErrorStrings.ErrorLoadingKmsSecret, AwsAccountInfo.KmsName, ex.Message), ex.InnerException);
+                throw new Exception(string.Format(ErrorStrings.ErrorLoadingKmsSecret, AwsAccountInfo.SecretName, ex.Message), ex.InnerException);
             }
-            return kmsSecret;
+            return secretsManagerSecret;
         }
 
         internal static async Task<List<Ec2Instance>> ListEc2InstancesAsync(IConfiguration Configuration)
@@ -61,7 +61,7 @@ namespace Ec2Manager.Workers
                 try
                 {
                     var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                    accountKey.SecretKey = await GetSecretKeyFromKmsAsync(accountKey);
+                    accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
                     var describeRequest = new DescribeInstancesRequest();
                     var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
                     var describeResponse = await ec2Client.DescribeInstancesAsync(describeRequest);
@@ -96,7 +96,7 @@ namespace Ec2Manager.Workers
             {
                 var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                accountKey.SecretKey = await GetSecretKeyFromKmsAsync(accountKey);
+                accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
                 var instanceIdAsList = new List<string> { InstanceId };
                 var startRequest = new StartInstancesRequest(instanceIdAsList);
                 var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
@@ -115,7 +115,7 @@ namespace Ec2Manager.Workers
             {
                 var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                accountKey.SecretKey = await GetSecretKeyFromKmsAsync(accountKey);
+                accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
                 var instanceIdAsList = new List<string> { InstanceId };
                 var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
                 var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
