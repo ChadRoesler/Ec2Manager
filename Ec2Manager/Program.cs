@@ -1,6 +1,5 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using HybridScaffolding;
-using Ec2Manager.Models.DataManagement;
 
 namespace Ec2Manager
 {
@@ -8,8 +7,14 @@ namespace Ec2Manager
     {
         public static void Main(string[] args)
         {
-            var ec2ManagerScaffold = new Ec2ManagerScaffold();
-            HybridExecutor.DispatchExecutor(ec2ManagerScaffold, args, typeof(HostBuilder));
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
