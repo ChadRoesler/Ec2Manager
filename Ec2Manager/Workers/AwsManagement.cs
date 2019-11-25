@@ -23,9 +23,9 @@ namespace Ec2Manager.Workers
             var claimAccounts = Configuration.GetSection("Okta:ClaimValueAccounts").Get<IEnumerable<ClaimValueAccount>>();
             return claimAccounts;
         }
-        internal static IEnumerable<IAwsAccountInfo> LoadAwsAccounts(IConfiguration Configuration)
+        internal static IEnumerable<AwsAccountInfo> LoadAwsAccounts(IConfiguration Configuration)
         {
-            var awsKeys = Configuration.GetSection("Ec2Manager:Accounts").Get<IEnumerable<IAwsAccountInfo>>();
+            var awsKeys = Configuration.GetSection("Ec2Manager:Accounts").Get<IEnumerable<AwsAccountInfo>>();
             return awsKeys;
         }
 
@@ -47,7 +47,7 @@ namespace Ec2Manager.Workers
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format(ErrorStrings.ErrorLoadingKmsSecret, AwsAccountInfo.SecretName, ex.Message), ex.InnerException);
+                throw new Exception(string.Format(ErrorStrings.ErrorLoadingSecret, AwsAccountInfo.SecretName, ex.Message), ex.InnerException);
             }
             return secretsManagerSecret;
         }
