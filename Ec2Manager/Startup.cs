@@ -5,16 +5,15 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using HealthChecks.UI.Client;
 using Ec2Manager.Models;
-using Microsoft.Extensions.Logging;
+
 
 
 namespace Ec2Manager
@@ -32,7 +31,7 @@ namespace Ec2Manager
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHealthChecks();
-            if (Configuration["Okta:OktaDomain"] != null)
+            if (Configuration["OidcAuth:Domain"] != null)
             {
                 services.AddAuthentication(options =>
                 {
@@ -43,13 +42,13 @@ namespace Ec2Manager
                 .AddOpenIdConnect(options =>
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.Authority = Configuration["Okta:OktaDomain"] + "/oauth2/default";
+                    options.Authority = Configuration["OidcAuth:Domain"];
                     options.RequireHttpsMetadata = true;
-                    options.ClientId = Configuration["Okta:ClientId"];
-                    options.ClientSecret = Configuration["Okta:ClientSecret"];
+                    options.ClientId = Configuration["OidcAuth:ClientId"];
+                    options.ClientSecret = Configuration["OidcAuth:ClientSecret"];
                     options.ResponseType = OpenIdConnectResponseType.Code;
                     options.GetClaimsFromUserInfoEndpoint = true;
-                    foreach(var scope in Configuration.GetSection("Okta:ClientScopes").Get<List<string>>())
+                    foreach(var scope in Configuration.GetSection("OidcAuth:ClientScopes").Get<List<string>>())
                     {
                         options.Scope.Add(scope);
                     }
@@ -99,7 +98,7 @@ namespace Ec2Manager
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
             });
             app.UseRouting();
-            if (Configuration["Okta:OktaDomain"] != null)
+            if (Configuration["OidcAuth:Domain"] != null)
             {
                 app.UseAuthentication();
             }
@@ -122,6 +121,7 @@ namespace Ec2Manager
                 endpoints.MapControllerRoute(name: "PageNotFound",
                                                 "pagenotfound",
                                                 new { controller = "Home", action = "PageNotFound" });
+                endpoints.MapHealthChecks("/healthcheck");
             });
         }
     }

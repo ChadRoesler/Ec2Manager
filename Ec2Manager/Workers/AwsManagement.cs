@@ -18,11 +18,7 @@ namespace Ec2Manager.Workers
 {
     public static class AwsManagement
     {
-        internal static IEnumerable<ClaimValueAccount> LoadClaimValueAccounts(IConfiguration Configuration)
-        {
-            var claimAccounts = Configuration.GetSection("Okta:ClaimValueAccounts").Get<IEnumerable<ClaimValueAccount>>();
-            return claimAccounts;
-        }
+        
         internal static IEnumerable<AwsAccountInfo> LoadAwsAccounts(IConfiguration Configuration)
         {
             var awsKeys = Configuration.GetSection("Ec2Manager:Accounts").Get<IEnumerable<AwsAccountInfo>>();
