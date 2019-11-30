@@ -11,7 +11,7 @@ namespace Ec2Manager.Workers
 
         private static readonly string LOG_CONFIG_FILE = @"log4net.config";
 
-        private static readonly log4net.ILog _log = GetLogger(typeof(Logger));
+        private static readonly ILog _log = GetLogger(typeof(Logger));
 
         public static ILog GetLogger(Type type)
         {

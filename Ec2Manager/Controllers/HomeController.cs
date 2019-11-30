@@ -35,17 +35,17 @@ namespace Ec2Manager.Controllers
             var userClaims = HttpContext.User.Claims;
             var userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
             _logger.LogInformation(string.Format(MessageStrings.LoadingInstances, userClaimPreferredUserNameValue));
-            if (_configuration.GetValue<string>("Okta:OktaDomain") != null)
+            if (_configuration.GetValue<string>("OidcAuth:ClientAccountManagementClaim") != null)
             {
-                var userClaimAccountManagement = userClaims.Where(x => x.Type == _configuration.GetValue<string>("Okta:ClientAccountManagementClaim") && !Regex.Match(x.Value, "\\[.*\\]", RegexOptions.IgnoreCase).Success);
+                var userClaimAccountManagement = userClaims.Where(x => x.Type == _configuration.GetValue<string>("OidcAuth:ClientAccountManagementClaim") && !Regex.Match(x.Value, "\\[.*\\]", RegexOptions.IgnoreCase).Success);
                 var userAccounts = new List<string>();
                 userAccounts.AddRange(userClaimAccountManagement.Select(x => x.Value));
                 _logger.LogInformation(string.Format(MessageStrings.UserAccountManagment, userClaimPreferredUserNameValue, string.Join(", ", userAccounts)));
-                claimAccounts = AwsManagement.LoadClaimValueAccounts(_configuration).Where(x => userAccounts.Contains(x.Value)).ToList();
+                claimAccounts = OpenIdConnectManagement.LoadClaimValueAccounts(_configuration).Where(x => userAccounts.Contains(x.Value)).ToList();
             }
             else
             {
-                claimAccounts.Add(new ClaimValueAccount { Value = "NoAuth", Accounts = AwsManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName), EnableReboot = _configuration.GetValue<bool>("Ec2Manager:EnableReboot") });
+                claimAccounts.Add(new ClaimValueAccount { Value = "NoClaims", Accounts = AwsManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName), EnableReboot = _configuration.GetValue<bool>("Ec2Manager:EnableReboot") });
             }
             var instances = await AwsManagement.ListEc2InstancesAsync(_configuration);
             _logger.LogInformation(string.Format(MessageStrings.InitialInstanceCount, instances.Count));
