@@ -110,7 +110,7 @@
             {
                 <tr>
                     <td>
-                        <img src="@Url.Content(item.StatusImage)" alt="statusimage" sizes=""/>
+                        <img src="@Url.Content(item.StatusImage)" alt="statusimage" sizes="" />
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Name)
@@ -130,11 +130,33 @@
                     <td>
                         @if (@item.Status.Equals("stopped"))
                         {
-                            <a asp-action="Enable" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page"  asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-action="Enable" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
                         }
                         @if (@item.CanReboot && @item.Status.Equals("running"))
                         {
-                            <a asp-action="Reboot" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page"  asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Reboot</a>
+                            <a asp-action="Reboot" class="btn btn-primary btn-default" data-toggle="modal" data-target="#rebootModal">Reboot</a>
+                            <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="rebootModalLabel">Reboot Instance</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        @using (Html.BeginForm("Reboot", "Home", new { Id = item.Id, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
+                                        {
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to reboot Instance: @item.Id?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">Reboot</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </td>
                 </tr>
@@ -145,7 +167,8 @@
 
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white">
         <div class="container">
-            <pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4PageNumbersPlusPrevAndNext" asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="@Model.SortOrder"  />
+            <pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4PageNumbersPlusPrevAndNext" asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="@Model.SortOrder" />
         </div>
     </nav>
 }
+
