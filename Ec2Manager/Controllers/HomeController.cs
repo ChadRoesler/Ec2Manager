@@ -71,6 +71,7 @@ namespace Ec2Manager.Controllers
         }
 
         [Authorize]
+        [HttpPost]
         public async Task<IActionResult> RebootAsync(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaims = HttpContext.User.Claims;
