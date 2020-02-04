@@ -33,7 +33,7 @@ namespace Ec2Manager.Models.DataManagement
                 {
                     return "images/started.png";
                 }
-                else if (Status.Equals("terminating", StringComparison.InvariantCultureIgnoreCase))
+                else if (Status.Equals("shutting-down", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return "images/unknown.png";
                 }

@@ -28,56 +28,29 @@ namespace Ec2Manager.Models.DataManagement
             var searchHits = searchData.Where(x => masterAccountList.Contains(x.Account));
             if (!string.IsNullOrWhiteSpace(query))
             {
-                switch (searchType.ToLower())
+                searchHits = (searchType.ToLower()) switch
                 {
-                    case "ipaddress":
-                        searchHits = searchHits.Where(x => Regex.Match(x.IpAddress, query, RegexOptions.IgnoreCase).Success);
-                        break;
-                    case "status":
-                        searchHits = searchHits.Where(x => Regex.Match(x.Status, query, RegexOptions.IgnoreCase).Success);
-                        break;
-                    case "id":
-                        searchHits = searchHits.Where(x => Regex.Match(x.Id, query, RegexOptions.IgnoreCase).Success);
-                        break;
-                    case "account":
-                        searchHits = searchHits.Where(x => Regex.Match(x.Account, query, RegexOptions.IgnoreCase).Success);
-                        break;
-                    case "name":
-                    default:
-                        searchHits = searchHits.Where(x => Regex.Match(x.Name, query, RegexOptions.IgnoreCase).Success);
-                        break;
-                }
-                
+                    "ipaddress" => searchHits.Where(x => Regex.Match(x.IpAddress, query, RegexOptions.IgnoreCase).Success),
+                    "status" => searchHits.Where(x => Regex.Match(x.Status, query, RegexOptions.IgnoreCase).Success),
+                    "id" => searchHits.Where(x => Regex.Match(x.Id, query, RegexOptions.IgnoreCase).Success),
+                    "account" => searchHits.Where(x => Regex.Match(x.Account, query, RegexOptions.IgnoreCase).Success),
+                    _ => searchHits.Where(x => Regex.Match(x.Name, query, RegexOptions.IgnoreCase).Success),
+                };
             }
-            
-            switch (sortOrder.ToLower())
+
+            searchHits = (sortOrder.ToLower()) switch
             {
-                case "status":
-                    searchHits = searchHits.OrderBy(x => x.Status);
-                    break;
-                case "status_desc":
-                    searchHits = searchHits.OrderByDescending(x => x.Status);
-                    break;
-                case "ipaddress":
-                    searchHits = searchHits.OrderBy(x => x.IpAddress);
-                    break;
-                case "ipaddress_desc":
-                    searchHits = searchHits.OrderByDescending(x => x.IpAddress);
-                    break;
-                case "id":
-                    searchHits = searchHits.OrderBy(x => x.Id);
-                    break;
-                case "id_desc":
-                    searchHits = searchHits.OrderByDescending(x => x.Id);
-                    break;
-                case "name_desc":
-                    searchHits = searchHits.OrderByDescending(x => x.Name);
-                    break;
-                case "name":
-                default:
-                    searchHits = searchHits.OrderBy(x => x.Name);
-                    break;
-            }
+                "status" => searchHits.OrderBy(x => x.Status),
+                "status_desc" => searchHits.OrderByDescending(x => x.Status),
+                "ipaddress" => searchHits.OrderBy(x => x.IpAddress),
+                "ipaddress_desc" => searchHits.OrderByDescending(x => x.IpAddress),
+                "id" => searchHits.OrderBy(x => x.Id),
+                "id_desc" => searchHits.OrderByDescending(x => x.Id),
+                "account" => searchHits.OrderBy(x => x.Account),
+                "account_desc" => searchHits.OrderByDescending(x => x.Account),
+                "name_desc" => searchHits.OrderByDescending(x => x.Name),
+                _ => searchHits.OrderBy(x => x.Name),
+            };
             searchHits.ToList().ForEach(x => x.CanReboot = claimValueData.SingleOrDefault(y => y.Accounts.Contains(x.Account) && y.EnableReboot) != null);
 
             var searchResult = new SearchResult()
