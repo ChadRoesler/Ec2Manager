@@ -71,7 +71,30 @@ namespace Ec2Manager.Workers
                                 if (Regex.Match(instance.Tags.SingleOrDefault(t => t.Key == accountKey.TagToSearch)?.Value, accountKey.SearchString).Success)
                                 {
                                     var name = instance.Tags.SingleOrDefault(t => t.Key == accountKey.NameTag)?.Value;
-                                    var ec2InstanceToManage = new Ec2Instance(name, instance.PrivateIpAddress, instance.InstanceId, instance.State.Name.Value, accountKey.AccountName);
+                                    var state = string.Empty;
+                                    if(instance.State.Name == InstanceStateName.Running)
+                                    {
+                                        ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
+                                        var statusResponse = await ec2Client.DescribeInstanceStatusAsync(new DescribeInstanceStatusRequest { InstanceIds = { instance.InstanceId } });
+                                        ec2Client.Dispose();
+                                        if (string.Equals(statusResponse.InstanceStatuses[0].Status.Status.Value, "impaired", StringComparison.InvariantCultureIgnoreCase) || string.Equals(statusResponse.InstanceStatuses[0].SystemStatus.Status.Value, "impaired", StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            state = "impaired";
+                                        }
+                                        else if (string.Equals(statusResponse.InstanceStatuses[0].Status.Status.Value, "initializing", StringComparison.InvariantCultureIgnoreCase) || string.Equals(statusResponse.InstanceStatuses[0].SystemStatus.Status.Value, "initializing", StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            state = "initializing";
+                                        }
+                                        else
+                                        {
+                                            state = instance.State.Name.Value;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        state = instance.State.Name.Value;
+                                    }
+                                    var ec2InstanceToManage = new Ec2Instance(name, instance.PrivateIpAddress, instance.InstanceId, state, accountKey.AccountName);
                                     ecInstancesToManage.Add(ec2InstanceToManage);
                                 }
                             }

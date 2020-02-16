@@ -35,11 +35,19 @@ namespace Ec2Manager.Models.DataManagement
                 }
                 else if (Status.Equals("shutting-down", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return "images/unknown.png";
+                    return "images/changing.png";
                 }
                 else if (Status.Equals("terminated", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return "images/unknown.png";
+                }
+                else if(Status.Equals("initializing", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return "images/changing.png";
+                }
+                else if(Status.Equals("impaired", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return "images/warning.png";
                 }
                 else
                 {
