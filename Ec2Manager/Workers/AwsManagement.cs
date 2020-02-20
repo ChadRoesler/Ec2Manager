@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
@@ -109,7 +110,7 @@ namespace Ec2Manager.Workers
             return ecInstancesToManage.OrderBy(x => x.Name).ToList();
         }
 
-        internal static async Task StartEc2InstanceAsync(IConfiguration Configuration, string AccountName, string InstanceId)
+        internal static async Task<StartInstancesResponse> StartEc2InstanceAsync(IConfiguration Configuration, string AccountName, string InstanceId)
         {
             try
             {
@@ -119,8 +120,9 @@ namespace Ec2Manager.Workers
                 var instanceIdAsList = new List<string> { InstanceId };
                 var startRequest = new StartInstancesRequest(instanceIdAsList);
                 var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
-                await ec2Client.StartInstancesAsync(startRequest);
+                var response = ec2Client.StartInstancesAsync(startRequest);
                 ec2Client.Dispose();
+                return await response;
             }
             catch (Exception e)
             {
@@ -128,7 +130,7 @@ namespace Ec2Manager.Workers
             }
         }
 
-        internal static async Task RebootEc2InstanceAsync(IConfiguration Configuration, string AccountName, string InstanceId)
+        internal static async Task<RebootInstancesResponse> RebootEc2InstanceAsync(IConfiguration Configuration, string AccountName, string InstanceId)
         {
             try
             {
@@ -138,8 +140,9 @@ namespace Ec2Manager.Workers
                 var instanceIdAsList = new List<string> { InstanceId };
                 var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
                 var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
-                await ec2Client.RebootInstancesAsync(rebootRequest);
+                var response = ec2Client.RebootInstancesAsync(rebootRequest);
                 ec2Client.Dispose();
+                return await response;
             }
             catch (Exception e)
             {
