@@ -33,7 +33,7 @@ namespace Ec2Manager.Controllers
         {
             var claimAccounts = new List<ClaimValueAccount>();
             var userClaims = HttpContext.User.Claims;
-            var userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
+            var userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value ?? ResourceStrings.NoUserName;
             _logger.LogInformation(string.Format(MessageStrings.LoadingInstances, userClaimPreferredUserNameValue));
             if (_configuration.GetValue<string>("OidcAuth:ClientAccountManagementClaim") != null)
             {
@@ -64,8 +64,8 @@ namespace Ec2Manager.Controllers
             var userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserEnable, userClaimPreferredUserNameValue, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            await AwsManagement.StartEc2InstanceAsync(_configuration, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserEnableSuccess, userClaimPreferredUserNameValue, Id));
+            var response = await AwsManagement.StartEc2InstanceAsync(_configuration, account, Id);
+            _logger.LogInformation(string.Format(MessageStrings.UserEnableSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
 
         }
@@ -76,10 +76,10 @@ namespace Ec2Manager.Controllers
         {
             var userClaims = HttpContext.User.Claims;
             var userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
-            _logger.LogInformation(string.Format(MessageStrings.UserEnable, userClaimPreferredUserNameValue, Id));
+            _logger.LogInformation(string.Format(MessageStrings.UserReboot, userClaimPreferredUserNameValue, Id));
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            await AwsManagement.RebootEc2InstanceAsync(_configuration, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserRebootSuccess, userClaimPreferredUserNameValue, Id));
+            var response = await AwsManagement.RebootEc2InstanceAsync(_configuration, account, Id);
+            _logger.LogInformation(string.Format(MessageStrings.UserRebootSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
 
