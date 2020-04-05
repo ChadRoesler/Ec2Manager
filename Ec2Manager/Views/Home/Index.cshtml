@@ -158,6 +158,30 @@
                                     </div>
                                 </div>
                             </div>
+                            <a asp-action="Stop" class="btn btn-primary btn-danger" data-toggle="modal" data-target="#stopModal">Stop</a>
+                            <div class="modal fade" id="stopModal" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="stopModalLabel">Stop Instance</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        @using (Html.BeginForm("Stop", "Home", new { Id = item.Id, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
+                                        {
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to stop Instance: @item.Id?</p>
+                                                <p>The User will <b>NOT</b> be made aware of the impending stop!</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">Stop</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </td>
                 </tr>

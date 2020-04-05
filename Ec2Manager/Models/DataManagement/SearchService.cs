@@ -52,6 +52,7 @@ namespace Ec2Manager.Models.DataManagement
                 _ => searchHits.OrderBy(x => x.Name),
             };
             searchHits.ToList().ForEach(x => x.CanReboot = claimValueData.SingleOrDefault(y => y.Accounts.Contains(x.Account) && y.EnableReboot) != null);
+            searchHits.ToList().ForEach(x => x.CanStop = claimValueData.SingleOrDefault(y => y.Accounts.Contains(x.Account) && y.EnableStop) != null);
 
             var searchResult = new SearchResult()
             {

@@ -149,5 +149,25 @@ namespace Ec2Manager.Workers
                 throw new Exception(string.Format(ErrorStrings.RebootEc2InstanceError, InstanceId, e.Message), e.InnerException);
             }
         }
+
+        internal static async Task<StopInstancesResponse> StopEc2InstanceAsync(IConfiguration Configuration, string AccountName, string InstanceId)
+        {
+            try
+            {
+                var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
+                var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
+                var instanceIdAsList = new List<string> { InstanceId };
+                var stopRequest = new StopInstancesRequest(instanceIdAsList);
+                var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
+                var response = ec2Client.StopInstancesAsync(stopRequest);
+                ec2Client.Dispose();
+                return await response;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.RebootEc2InstanceError, InstanceId, e.Message), e.InnerException);
+            }
+        }
     }
 }

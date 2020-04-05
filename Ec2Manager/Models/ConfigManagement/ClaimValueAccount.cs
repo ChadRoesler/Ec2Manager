@@ -8,5 +8,7 @@ namespace Ec2Manager.Models.ConfigManagement
         public IEnumerable<string> Accounts { get; set; }
 
         public bool EnableReboot { get; set; }
+
+        public bool EnableStop { get; set; }
     }
 }

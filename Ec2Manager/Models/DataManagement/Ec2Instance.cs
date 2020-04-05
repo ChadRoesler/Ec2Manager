@@ -63,5 +63,6 @@ namespace Ec2Manager.Models.DataManagement
         public string Id { get; set; }
         public string Status { get; set; }
         public bool CanReboot { get; set; }
+        public bool CanStop { get; set; }
     }
 }
