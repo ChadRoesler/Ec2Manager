@@ -134,7 +134,7 @@
                         }
                         @if (@item.CanReboot && @item.Status.Equals("running"))
                         {
-                            <a asp-action="Reboot" class="btn btn-primary btn-default" data-toggle="modal" data-target="#rebootModal">Reboot</a>
+                            <a asp-action="Reboot" class="btn btn-primary btn-warning" data-toggle="modal" data-target="#rebootModal">Reboot</a>
                             <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
