@@ -1,17 +1,18 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Ec2Manager.Models.DataManagement
 {
     public class Ec2Instance
     {
-        public Ec2Instance(string Name, string IpAddress, string Id, string Status, string AccountName)
+        public Ec2Instance(string Name, string IpAddress, string Id, string Status, string Account)
         {
             this.Name = Name;
             this.IpAddress = IpAddress;
             this.Id = Id;
             this.Status = Status;
-            this.Account = AccountName;
+            this.Account = Account;
         }
         public string StatusImage
         {
@@ -62,7 +63,11 @@ namespace Ec2Manager.Models.DataManagement
         [Display(Name = "Instance Id")]
         public string Id { get; set; }
         public string Status { get; set; }
+        [DefaultValue(false)]
+        public bool CanStart { get; set; }
+        [DefaultValue(false)]
         public bool CanReboot { get; set; }
+        [DefaultValue(false)]
         public bool CanStop { get; set; }
     }
 }

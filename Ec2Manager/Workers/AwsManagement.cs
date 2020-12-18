@@ -130,6 +130,37 @@ namespace Ec2Manager.Workers
             }
         }
 
+        internal static async void AdminStartEc2InstancesAsync(IConfiguration Configuration, IEnumerable<Ec2InstanceBase> InstanceIds)
+        {
+            var failedInstances = new List<string>();
+            try
+            {
+                
+                foreach (var account in InstanceIds.Select(x => x.Account).Distinct())
+                {
+                    try
+                    {
+                        var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == account);
+                        var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                        accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
+                        var instanceIdAsList = InstanceIds.Where(x => x.Account == account).Select(x => x.Id).ToList();
+                        var startRequest = new StartInstancesRequest(instanceIdAsList);
+                        var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
+                        _ = await ec2Client.StartInstancesAsync(startRequest);
+                        ec2Client.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        failedInstances.Add(account + e.Message);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, failedInstances.ToString(), e.Message), e.InnerException);
+            }
+        }
+
         internal static async Task<RebootInstancesResponse> RebootEc2InstanceAsync(IConfiguration Configuration, string AccountName, string InstanceId)
         {
             try
@@ -150,6 +181,36 @@ namespace Ec2Manager.Workers
             }
         }
 
+        internal static async void AdminRebootEc2InstancesAsync(IConfiguration Configuration, IEnumerable<Ec2InstanceBase> InstanceIds)
+        {
+            var failedInstances = new List<string>();
+            try
+            {
+
+                foreach (var account in InstanceIds.Select(x => x.Account).Distinct())
+                {
+                    try
+                    {
+                        var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == account);
+                        var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                        accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
+                        var instanceIdAsList = InstanceIds.Where(x => x.Account == account).Select(x => x.Id).ToList();
+                        var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
+                        var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
+                        _ = await ec2Client.RebootInstancesAsync(rebootRequest);
+                        ec2Client.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        failedInstances.Add(account + e.Message);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, failedInstances.ToString(), e.Message), e.InnerException);
+            }
+        }
         internal static async Task<StopInstancesResponse> StopEc2InstanceAsync(IConfiguration Configuration, string AccountName, string InstanceId)
         {
             try
@@ -167,6 +228,37 @@ namespace Ec2Manager.Workers
             catch (Exception e)
             {
                 throw new Exception(string.Format(ErrorStrings.RebootEc2InstanceError, InstanceId, e.Message), e.InnerException);
+            }
+        }
+
+        internal static async void AdminStopEc2InstancesAsync(IConfiguration Configuration, IEnumerable<Ec2InstanceBase> InstanceIds)
+        {
+            var failedInstances = new List<string>();
+            try
+            {
+
+                foreach (var account in InstanceIds.Select(x => x.Account).Distinct())
+                {
+                    try
+                    {
+                        var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == account);
+                        var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
+                        accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
+                        var instanceIdAsList = InstanceIds.Where(x => x.Account == account).Select(x => x.Id).ToList();
+                        var stopRequest = new StopInstancesRequest(instanceIdAsList);
+                        var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
+                        _ = await ec2Client.StopInstancesAsync(stopRequest);
+                        ec2Client.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        failedInstances.Add(account + e.Message);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, failedInstances.ToString(), e.Message), e.InnerException);
             }
         }
     }

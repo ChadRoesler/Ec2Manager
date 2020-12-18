@@ -2,12 +2,13 @@
 @using PagedList.Core
 @using PagedList.Core.Mvc
 @using Ec2Manager.Models.DataManagement
+ 
 @inject IConfiguration Configuration
 @model SearchResult
 @{
-    ViewData["Title"] = "Base";
-    ViewData["SearchQuery"] = Model.SearchQuery;
-    ViewData["SearchType"] = Model.SearchType;
+    ViewData["Title"] = "Home";
+    ViewData["SearchQuery"] = Model.SearchData.SearchQuery;
+    ViewData["SearchType"] = Model.SearchData.SearchType;
 }
 @{
     var hasResult = Model.SearchHits != null && Model.SearchHits.TotalItemCount > 0;
@@ -16,7 +17,7 @@
 {
     <div class="text-center">
         <img class="figure-img" src="~/images/warning.png" />
-        <p>No matches were found for <strong>"@Model.SearchQuery"</strong> in <strong>"@Model.SearchType"</strong></p>
+        <p>No matches were found for <strong>"@Model.SearchData.SearchQuery"</strong> in <strong>"@Model.SearchData.SearchType"</strong></p>
         <a asp-action="Index" asp-controller="Home">
             Return to List
         </a>
@@ -30,23 +31,27 @@
                 <th>
                 </th>
                 <th>
-                    @if (Model.SortOrder == "name")
+                    @if (Model.SearchData.SortOrder == "name")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name_desc">
-                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
-                        </a>
+                        Model.SearchData.SortOrder = "name_desc";
+                        @Html.ActionLink(@Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name), "GET", "Home", Model.SearchData);
+                        @*<a asp-action="Index" asp-controller="Home" asp-route-searchdata="@Model.SearchData">
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
+            </a>*@
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name">
-                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
-                        </a>
+                        Model.SearchData.SortOrder = "name";
+                        @Html.ActionLink(@Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name), "GET", "Home", Model.SearchData);
+                        @*<a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchData">
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
+            </a>*@
                     }
                 </th>
                 <th>
-                    @if (Model.SortOrder == "account")
+                    @if (Model.SearchData.SortOrder == "account")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
+                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchData.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
                         </a>
                     }
@@ -73,17 +78,22 @@
 
                 </th>
                 <th>
-                    @if (Model.SortOrder == "ipaddress")
+                    @if (Model.SearchData.SortOrder == "ipaddress")
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
-                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
-                        </a>
+                        Model.SearchData.SortOrder = "ipaddress_desc";
+                        @Html.HiddenFor(m => m.SearchData.SortOrder)
+                        @Html.ActionLink(@Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress), "Index", "Home", Model.SearchData)
+                        @*<a asp-action="Index" asp-controller="Home" asp-route-searchdata="@Model.SearchData" >
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
+            </a>*@
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
-                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
-                        </a>
+                        Model.SearchData.SortOrder = "ipaddress";
+                        @Html.ActionLink(@Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress), "Index", "Home", Model.SearchData);
+                        @*<a asp-action="Index" asp-controller="Home" asp-route-searchdata="@Model.SearchData">
+                @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
+            </a>*@
                     }
                 </th>
                 <th>
@@ -128,14 +138,42 @@
                         @Html.DisplayFor(modelItem => item.Id)
                     </td>
                     <td>
-                        @if (@item.Status.Equals("stopped"))
+                        
+                        @if (item.CanStart && @item.Status.Equals("stopped"))
                         {
-                            <a asp-action="Enable" asp-route-id="@item.Id" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
+                            <div style="text-align:center">
+                                <a asp-action="Enable" class="btn btn-primary btn-outline-success" data-toggle="modal" data-target="#enableModal-@item.Id">Enable</a>
+                            </div>
+                            <div class="modal fade" id="enableModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="enableModallLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="enableModalLabel">Enable Instance</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        @using (Html.BeginForm("Enable", "Home", new { Id = item.Id, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
+                                        {
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to Enable this Instance?</p>
+                                                <p> - Instance Id: @item.Id</p>
+                                                <p> - Instance Name: @item.Name</p>
+                                                <p> - Instance Ip: @item.IpAddress</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-success">Enable</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         }
                         @if (@item.CanReboot && @item.Status.Equals("running"))
                         {
-                            <a asp-action="Reboot" class="btn btn-primary btn-default" data-toggle="modal" data-target="#rebootModal">Reboot</a>
-                            <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
+                            <a asp-action="Reboot" class="btn btn-primary btn-outline-warning" data-toggle="modal" data-target="#rebootModal-@item.Id">Reboot</a>
+                            <div class="modal fade" id="rebootModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -147,19 +185,22 @@
                                         @using (Html.BeginForm("Reboot", "Home", new { Id = item.Id, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
                                         {
                                             <div class="modal-body">
-                                                <p>Are you sure you want to reboot Instance: @item.Id?</p>
+                                                <p>Are you sure you want to Reboot this Instance?</p>
+                                                <p> - Instance Id: @item.Id</p>
+                                                <p> - Instance Name: @item.Name</p>
+                                                <p> - Instance Ip: @item.IpAddress</p>
                                                 <p>The User will <b>NOT</b> be made aware of the impending reboot!</p>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-danger">Reboot</button>
+                                                <button type="submit" class="btn btn-warning">Reboot</button>
                                             </div>
                                         }
                                     </div>
                                 </div>
                             </div>
-                            <a asp-action="Stop" class="btn btn-primary btn-danger" data-toggle="modal" data-target="#stopModal">Stop</a>
-                            <div class="modal fade" id="stopModal" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">
+                            <a asp-action="Stop" class="btn btn-primary btn-outline-danger" data-toggle="modal" data-target="#stopModal-@item.Id">Stop</a>
+                            <div class="modal fade" id="stopModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -171,7 +212,10 @@
                                         @using (Html.BeginForm("Stop", "Home", new { Id = item.Id, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
                                         {
                                             <div class="modal-body">
-                                                <p>Are you sure you want to stop Instance: @item.Id?</p>
+                                                <p>Are you sure you want to Stop this Instance?</p>
+                                                <p> - Instance Id: @item.Id</p>
+                                                <p> - Instance Name: @item.Name</p>
+                                                <p> - Instance Ip: @item.IpAddress</p>
                                                 <p>The User will <b>NOT</b> be made aware of the impending stop!</p>
                                             </div>
                                             <div class="modal-footer">

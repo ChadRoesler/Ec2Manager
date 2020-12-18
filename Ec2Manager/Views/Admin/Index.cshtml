@@ -3,7 +3,7 @@
 @using PagedList.Core.Mvc
 @using Ec2Manager.Models.DataManagement
 @inject IConfiguration Configuration
-@model SearchResult
+@model AdminSearchResult
 
 @{
     ViewData["Title"] = "Admin";
@@ -13,21 +13,29 @@
 
 
 <h1>Admin</h1>
-<table class="table">
+<head>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="~/js/site.js"></script>
+</head>
+<table class="table" id="instanceTable">
     <thead>
         <tr>
             <th>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="masterCheck">
+                    <label class="custom-control-label" for="masterCheck"></label>
+                </div>
             </th>
             <th>
                 @if (Model.SortOrder == "name")
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name_desc">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name_desc">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
                     </a>
                 }
                 else
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
                     </a>
                 }
@@ -35,13 +43,13 @@
             <th>
                 @if (Model.SortOrder == "account")
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
                     </a>
                 }
                 else
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
                     </a>
                 }
@@ -49,13 +57,13 @@
             <th>
                 @if (Model.SortOrder == "status")
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status_desc">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status_desc">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
                     </a>
                 }
                 else
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
                     </a>
                 }
@@ -64,13 +72,13 @@
             <th>
                 @if (Model.SortOrder == "ipaddress")
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
                     </a>
                 }
                 else
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
                     </a>
                 }
@@ -78,19 +86,17 @@
             <th>
                 @if (Model.SortOrder == "id")
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id_desc">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id_desc">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
                     </a>
                 }
                 else
                 {
-                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id">
+                    <a asp-action="Index" asp-controller="Admin" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id">
                         @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
                     </a>
                 }
 
-            </th>
-            <th>
             </th>
         </tr>
     </thead>
@@ -100,8 +106,8 @@
             <tr>
                 <td>
                     <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="@item.Id">
-                        <label class="custom-control-label" for="@item.Id"></label>
+                        <input type="checkbox" class="custom-control-input" id="@item.Id|@item.Account" name="row-check">
+                        <label class="custom-control-label" for="@item.Id|@item.Account"></label>
                     </div>
                 </td>
                 <td>
@@ -123,5 +129,74 @@
         }
     </tbody>
 </table>
+<div>
+    <div style="text-align:right">
+        <a asp-action="Enable" class="btn btn-primary btn-outline-success" data-toggle="modal" data-target="#enableModal">Enable</a>
+        <a asp-action="Restart" class="btn btn-primary btn-outline-warning" data-toggle="modal" data-target="#rebootModal">Reboot</a>
+        <a asp-action="Stop" class="btn btn-primary btn-outline-danger" data-toggle="modal" data-target="#stopModal">Stop</a>
+    </div>
+    <div class="modal fade" id="enableModal" tabindex="-1" role="dialog" aria-labelledby="enableModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="enableModalLabel">Enable Instances</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="@Url.Action("Enable", "Admin")" method="post">
+                    <div class="modal-body">
+                        <p>Are you sure you want to Enable these Instances?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success" id="enableConfirm">Enable</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rebootModalLabel">Reboot Instances</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="@Url.Action("Reboot", "Admin")" method="post">
+                    <div class="modal-body">
+                        <p>Are you sure you want to Reboot these Instances?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning" id="rebootConfirm">Reboot</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="stopModal" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="stopModalLabel">Stop Instances</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="@Url.Action("Stop", "Admin")" method="post">
+                    <div class="modal-body">
+                        <p>Are you sure you want to Stop these Instances?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger" id="stopConfirm">Stop</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <br />
-

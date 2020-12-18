@@ -15,5 +15,6 @@ namespace Ec2Manager.Models.DataManagement
         public string SortOrder { get; set; }
 
         public string SearchType { get; set; }
+        public SearchData SearchData { get; set; }
     }
 }

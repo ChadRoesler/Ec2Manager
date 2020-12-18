@@ -13,8 +13,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using HealthChecks.UI.Client;
 using Ec2Manager.Models;
-
-
+using Microsoft.AspNetCore.Http;
 
 namespace Ec2Manager
 {
@@ -71,6 +70,7 @@ namespace Ec2Manager
                         .Build();
                 });
             }
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddControllersWithViews();
         }
 
