@@ -1,0 +1,127 @@
+﻿@using Microsoft.Extensions.Configuration
+@using PagedList.Core
+@using PagedList.Core.Mvc
+@using Ec2Manager.Models.DataManagement
+@inject IConfiguration Configuration
+@model SearchResult
+
+@{
+    ViewData["Title"] = "Admin";
+    ViewData["SearchQuery"] = Model.SearchQuery;
+    ViewData["SearchType"] = Model.SearchType;
+}
+
+
+<h1>Admin</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+            </th>
+            <th>
+                @if (Model.SortOrder == "name")
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name_desc">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
+                    </a>
+                }
+            </th>
+            <th>
+                @if (Model.SortOrder == "account")
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
+                    </a>
+                }
+            </th>
+            <th>
+                @if (Model.SortOrder == "status")
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status_desc">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
+                    </a>
+                }
+
+            </th>
+            <th>
+                @if (Model.SortOrder == "ipaddress")
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IpAddress)
+                    </a>
+                }
+            </th>
+            <th>
+                @if (Model.SortOrder == "id")
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id_desc">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" asp-controller="Home" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="id">
+                        @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Id)
+                    </a>
+                }
+
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.SearchHits)
+        {
+            <tr>
+                <td>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="@item.Id">
+                        <label class="custom-control-label" for="@item.Id"></label>
+                    </div>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Account)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IpAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+
