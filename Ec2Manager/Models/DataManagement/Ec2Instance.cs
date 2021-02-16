@@ -41,11 +41,11 @@ namespace Ec2Manager.Models.DataManagement
                 {
                     return "images/unknown.png";
                 }
-                else if(Status.Equals("initializing", StringComparison.InvariantCultureIgnoreCase))
+                else if (Status.Equals("initializing", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return "images/changing.png";
                 }
-                else if(Status.Equals("impaired", StringComparison.InvariantCultureIgnoreCase))
+                else if (Status.Equals("impaired", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return "images/warning.png";
                 }

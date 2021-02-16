@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using PagedList.Core;
-using System.Collections.Generic;
+﻿using PagedList.Core;
 
 namespace Ec2Manager.Models.DataManagement
 {

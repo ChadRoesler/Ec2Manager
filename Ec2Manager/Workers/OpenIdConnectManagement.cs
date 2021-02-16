@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Ec2Manager.Models.ConfigManagement;
 using Microsoft.Extensions.Configuration;
-using Ec2Manager.Models.ConfigManagement;
+using System.Collections.Generic;
 
 namespace Ec2Manager.Workers
 {

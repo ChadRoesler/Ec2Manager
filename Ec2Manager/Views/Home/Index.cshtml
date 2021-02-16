@@ -134,8 +134,8 @@
                         }
                         @if (@item.CanReboot && @item.Status.Equals("running"))
                         {
-                            <a asp-action="Reboot" class="btn btn-primary btn-warning" data-toggle="modal" data-target="#rebootModal">Reboot</a>
-                            <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
+                            <a asp-action="Reboot" class="btn btn-primary btn-warning" data-toggle="modal" data-target="#rebootModal-@item.Id">Reboot</a>
+                            <div class="modal fade" id="rebootModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -158,8 +158,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <a asp-action="Stop" class="btn btn-primary btn-danger" data-toggle="modal" data-target="#stopModal">Stop</a>
-                            <div class="modal fade" id="stopModal" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">
+                            <a asp-action="Stop" class="btn btn-primary btn-danger" data-toggle="modal" data-target="#stopModal-@item.Id">Stop</a>
+                            <div class="modal fade" id="stopModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">

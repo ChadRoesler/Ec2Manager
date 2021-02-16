@@ -1,7 +1,8 @@
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
+using Ec2Manager.Models;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -11,10 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using HealthChecks.UI.Client;
-using Ec2Manager.Models;
-
-
+using System.Collections.Generic;
 
 namespace Ec2Manager
 {
@@ -48,7 +46,7 @@ namespace Ec2Manager
                     options.ClientSecret = Configuration["OidcAuth:ClientSecret"];
                     options.ResponseType = OpenIdConnectResponseType.Code;
                     options.GetClaimsFromUserInfoEndpoint = true;
-                    foreach(var scope in Configuration.GetSection("OidcAuth:ClientScopes").Get<List<string>>())
+                    foreach (var scope in Configuration.GetSection("OidcAuth:ClientScopes").Get<List<string>>())
                     {
                         options.Scope.Add(scope);
                     }
@@ -60,7 +58,7 @@ namespace Ec2Manager
                         ValidateIssuer = true
                     };
                 });
-                services.AddAuthorization();    
+                services.AddAuthorization();
             }
             else
             {
@@ -89,7 +87,7 @@ namespace Ec2Manager
                 app.UseStatusCodePages();
                 app.UseMiddleware<ErrorHandler>();
             }
-            
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseHealthChecks("/healthcheck", new HealthCheckOptions
@@ -113,7 +111,7 @@ namespace Ec2Manager
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                
+
                 endpoints.MapControllerRoute(name: "Error",
                                                     "error",
                                                     new { controller = "Home", action = "Error" });

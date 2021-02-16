@@ -1,8 +1,8 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using log4net;
 
 namespace Ec2Manager.Workers
 {
