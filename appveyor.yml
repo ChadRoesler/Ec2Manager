@@ -3,9 +3,6 @@ branches:
   only:
   - master
 skip_tags: true
-skip_commits:
-  files:
-    - README.md
 image: Visual Studio 2019
 configuration: Release
 dotnet_csproj:
