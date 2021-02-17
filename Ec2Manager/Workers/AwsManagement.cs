@@ -62,7 +62,7 @@ namespace Ec2Manager.Workers
                     var assumeRoleRequest = new AssumeRoleRequest
                     {
                         RoleArn = accountKey.RoleArn,
-                        RoleSessionName = string.Format(ResourceStrings.ListAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()),
+                        RoleSessionName = string.Format(ResourceStrings.ListAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0, 64),
                         DurationSeconds = 900
                     };
                     var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
@@ -133,7 +133,7 @@ namespace Ec2Manager.Workers
                 var assumeRoleRequest = new AssumeRoleRequest
                 {
                     RoleArn = accountKey.RoleArn,
-                    RoleSessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()),
+                    RoleSessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0,64),
                     DurationSeconds = 900
                 };
                 var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
@@ -163,7 +163,7 @@ namespace Ec2Manager.Workers
                 var assumeRoleRequest = new AssumeRoleRequest
                 {
                     RoleArn = accountKey.RoleArn,
-                    RoleSessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()),
+                    RoleSessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0, 64),
                     DurationSeconds = 900
                 };
                 var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
@@ -193,7 +193,7 @@ namespace Ec2Manager.Workers
                 var assumeRoleRequest = new AssumeRoleRequest
                 {
                     RoleArn = accountKey.RoleArn,
-                    RoleSessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()),
+                    RoleSessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0, 64),
                     DurationSeconds = 900
                 };
                 var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
