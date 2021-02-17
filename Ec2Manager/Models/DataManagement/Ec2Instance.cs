@@ -62,7 +62,7 @@ namespace Ec2Manager.Models.DataManagement
         [Display(Name = "Instance Id")]
         public string Id { get; set; }
         public string Status { get; set; }
-        public bool CanReboot { get; set; }
-        public bool CanStop { get; set; }
+        public bool CanReboot { get; set; } = false;
+        public bool CanStop { get; set; } = false;
     }
 }

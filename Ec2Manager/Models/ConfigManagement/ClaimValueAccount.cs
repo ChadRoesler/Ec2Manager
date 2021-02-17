@@ -7,8 +7,8 @@ namespace Ec2Manager.Models.ConfigManagement
         public string Value { get; set; }
         public IEnumerable<string> Accounts { get; set; }
 
-        public bool EnableReboot { get; set; }
+        public bool EnableReboot { get; set; } = false;
 
-        public bool EnableStop { get; set; }
+        public bool EnableStop { get; set; } = false;
     }
 }
