@@ -24,29 +24,6 @@ namespace Ec2Manager.Workers
             return awsKeys;
         }
 
-        //internal static async Task<string> GetSecretKeyAsync(IAwsAccountInfo AwsAccountInfo)
-        //{
-        //    var secretsManagerSecret = string.Empty;
-        //    try
-        //    {
-        //        var accountRegion = RegionEndpoint.GetBySystemName(AwsAccountInfo.Region);
-        //        var secretsManagerClient = new AmazonSecretsManagerClient(accountRegion);
-        //        var secretsManagerRequest = new GetSecretValueRequest()
-        //        {
-        //            SecretId = AwsAccountInfo.SecretName
-        //        };
-        //        var secretsManagerResponse = await secretsManagerClient.GetSecretValueAsync(secretsManagerRequest);
-        //        secretsManagerSecret = secretsManagerResponse.SecretString;
-        //        secretsManagerClient.Dispose();
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception(string.Format(ErrorStrings.ErrorLoadingSecret, AwsAccountInfo.SecretName, ex.Message), ex.InnerException);
-        //    }
-        //    return secretsManagerSecret;
-        //}
-
         internal static async Task<List<Ec2Instance>> ListEc2InstancesAsync(IConfiguration Configuration, string User)
         {
             var ecInstancesToManage = new List<Ec2Instance>();
@@ -57,12 +34,13 @@ namespace Ec2Manager.Workers
                 try
                 {
                     var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                    //accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
                     var stsClient = new AmazonSecurityTokenServiceClient();
+                    var sessionName = string.Format(ResourceStrings.ListAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                    sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
                     var assumeRoleRequest = new AssumeRoleRequest
                     {
                         RoleArn = accountKey.RoleArn,
-                        RoleSessionName = string.Format(ResourceStrings.ListAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0, 64),
+                        RoleSessionName = sessionName,
                         DurationSeconds = 900
                     };
                     var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
@@ -86,7 +64,6 @@ namespace Ec2Manager.Workers
                                         stsClient = new AmazonSecurityTokenServiceClient();
                                         stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
                                         ec2Client = new AmazonEC2Client(stsResponse.Credentials, accountRegion);
-                                        //ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
                                         var statusResponse = await ec2Client.DescribeInstanceStatusAsync(new DescribeInstanceStatusRequest { InstanceIds = { instance.InstanceId } });
                                         ec2Client.Dispose();
                                         stsClient.Dispose();
@@ -128,18 +105,18 @@ namespace Ec2Manager.Workers
             {
                 var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                //accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
                 var stsClient = new AmazonSecurityTokenServiceClient();
+                var sessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
                 var assumeRoleRequest = new AssumeRoleRequest
                 {
                     RoleArn = accountKey.RoleArn,
-                    RoleSessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0,64),
+                    RoleSessionName = sessionName,
                     DurationSeconds = 900
                 };
                 var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
                 var instanceIdAsList = new List<string> { InstanceId };
                 var startRequest = new StartInstancesRequest(instanceIdAsList);
-                //var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
                 var ec2Client = new AmazonEC2Client(stsResponse.Credentials, accountRegion);
                 var response = ec2Client.StartInstancesAsync(startRequest);
                 ec2Client.Dispose();
@@ -158,18 +135,18 @@ namespace Ec2Manager.Workers
             {
                 var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                //accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
                 var stsClient = new AmazonSecurityTokenServiceClient();
+                var sessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
                 var assumeRoleRequest = new AssumeRoleRequest
                 {
                     RoleArn = accountKey.RoleArn,
-                    RoleSessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0, 64),
+                    RoleSessionName = sessionName,
                     DurationSeconds = 900
                 };
                 var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
                 var instanceIdAsList = new List<string> { InstanceId };
                 var rebootRequest = new RebootInstancesRequest(instanceIdAsList);
-                //var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
                 var ec2Client = new AmazonEC2Client(stsResponse.Credentials, accountRegion);
                 var response = ec2Client.RebootInstancesAsync(rebootRequest);
                 ec2Client.Dispose();
@@ -188,18 +165,18 @@ namespace Ec2Manager.Workers
             {
                 var accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 var accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                //accountKey.SecretKey = await GetSecretKeyAsync(accountKey);
                 var stsClient = new AmazonSecurityTokenServiceClient();
+                var sessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
                 var assumeRoleRequest = new AssumeRoleRequest
                 {
                     RoleArn = accountKey.RoleArn,
-                    RoleSessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString()).Substring(0, 64),
+                    RoleSessionName = sessionName,
                     DurationSeconds = 900
                 };
                 var stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
                 var instanceIdAsList = new List<string> { InstanceId };
                 var stopRequest = new StopInstancesRequest(instanceIdAsList);
-                //var ec2Client = new AmazonEC2Client(accountKey.AccessKey, accountKey.SecretKey, accountRegion);
                 var ec2Client = new AmazonEC2Client(stsResponse.Credentials, accountRegion);
                 var response = ec2Client.StopInstancesAsync(stopRequest);
                 ec2Client.Dispose();
