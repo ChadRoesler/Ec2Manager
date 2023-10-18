@@ -11,7 +11,7 @@ namespace Ec2Manager.Models.DataManagement
             this.IpAddress = IpAddress;
             this.Id = Id;
             this.Status = Status;
-            this.Account = AccountName;
+            Account = AccountName;
         }
         public string StatusImage
         {

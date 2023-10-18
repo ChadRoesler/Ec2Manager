@@ -20,7 +20,7 @@ namespace Ec2Manager.Workers
 
         internal static IEnumerable<AwsAccountInfo> LoadAwsAccounts(IConfiguration Configuration)
         {
-            var awsKeys = Configuration.GetSection("Ec2Manager:Accounts").Get<IEnumerable<AwsAccountInfo>>();
+            var awsKeys = Configuration.GetSection("Ec2Manager:Accounts:Aws").Get<IEnumerable<AwsAccountInfo>>();
             return awsKeys;
         }
 

@@ -22,7 +22,7 @@ build:
 after_build:
 - cmd: dotnet publish Ec2Manager\Ec2Manager.csproj
 artifacts:
-- path: '\Ec2Manager\bin\Release\net5.0\publish\'
+- path: '\Ec2Manager\bin\Release\net7.0\publish\'
   name: Ec2Manager
   type: WebDeployPackage
 deploy:
@@ -33,4 +33,4 @@ deploy:
   auth_token:
     secure: zoaU2+fLG/H7nvO4Qd9QW32NoHUC47fz+61pHlytQr5jgdQIZDcJ4d2TRFS1UOeS
   repository: ChadRoesler/Ec2Manager
-  artifact: Ec2Manager\bin\Release\net5.0\Ec2Manager.zip
+  artifact: Ec2Manager\bin\Release\net7.0\Ec2Manager.zip
