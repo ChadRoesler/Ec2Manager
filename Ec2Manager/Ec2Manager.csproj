@@ -7,8 +7,8 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.UI" Version="7.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.1.0" />
-    <PackageReference Include="AWSSDK.EC2" Version="3.7.220.2" />
-    <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.202.7" />
+    <PackageReference Include="AWSSDK.EC2" Version="3.7.220.3" />
+    <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.202.8" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.12" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="7.0.0" />
