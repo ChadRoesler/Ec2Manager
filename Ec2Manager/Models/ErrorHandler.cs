@@ -47,7 +47,7 @@ namespace Ec2Manager.Models
         //  500
         private static void HandleException(HttpContext context, Exception e)
         {
-            var cookieOptions = new CookieOptions
+            CookieOptions cookieOptions = new()
             {
                 Expires = DateTime.Now.AddMilliseconds(10000),
                 IsEssential = true
@@ -61,7 +61,7 @@ namespace Ec2Manager.Models
         {
             //  Display an information page that displays the bad url using a cookie
             string pageNotFound = context.Request.Path.ToString().TrimStart('/');
-            var cookieOptions = new CookieOptions
+            CookieOptions cookieOptions = new()
             {
                 Expires = DateTime.Now.AddMilliseconds(10000),
                 IsEssential = true

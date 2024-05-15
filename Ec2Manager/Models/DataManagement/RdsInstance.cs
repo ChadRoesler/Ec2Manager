@@ -4,13 +4,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ec2Manager.Models.DataManagement
 {
-    public class Ec2Instance : IAwsResource
+    public class RdsInstance : IAwsResource
     {
-        public Ec2Instance(string Name, string IpAddress, string Id, string Status, string AccountName)
+        public RdsInstance(string DbIdentifier, string Endpoint, string Status, string AccountName)
         {
-            this.Name = Name;
-            this.IpAddress = IpAddress;
-            this.Id = Id;
+            this.DbIdentifier = DbIdentifier;
+            this.Endpoint = Endpoint;
             this.Status = Status;
             Account = AccountName;
         }
@@ -54,11 +53,9 @@ namespace Ec2Manager.Models.DataManagement
             }
         }
         public string Account { get; set; }
-        public string Name { get; set; }
-        [Display(Name = "Ip Address")]
-        public string IpAddress { get; set; }
-        [Display(Name = "Instance Id")]
-        public string Id { get; set; }
+        [Display(Name = "Name")]
+        public string DbIdentifier { get; set; }
+        public string Endpoint { get; set; }
         public string Status { get; set; }
         public bool CanReboot { get; set; } = false;
         public bool CanStop { get; set; } = false;

@@ -26,10 +26,10 @@ namespace Ec2Manager.Workers
 
         private static void SetLog4NetConfiguration()
         {
-            XmlDocument log4netConfig = new XmlDocument();
+            XmlDocument log4netConfig = new();
             log4netConfig.Load(File.OpenRead(LOG_CONFIG_FILE));
 
-            var repo = LogManager.CreateRepository(
+            log4net.Repository.ILoggerRepository repo = LogManager.CreateRepository(
                 Assembly.GetEntryAssembly(), typeof(log4net.Repository.Hierarchy.Hierarchy));
 
             log4net.Config.XmlConfigurator.Configure(repo, log4netConfig["log4net"]);

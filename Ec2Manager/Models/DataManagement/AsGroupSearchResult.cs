@@ -2,9 +2,9 @@
 
 namespace Ec2Manager.Models.DataManagement
 {
-    public class SearchResult
+    public class AsGroupSearchResult
     {
-        public IPagedList<Ec2Instance> SearchHits { get; set; }
+        public IPagedList<AsGroup> SearchHits { get; set; }
 
         public string SearchQuery { get; set; }
 

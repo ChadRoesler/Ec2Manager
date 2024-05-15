@@ -8,7 +8,7 @@ namespace Ec2Manager.Workers
     {
         internal static IEnumerable<ClaimValueAccount> LoadClaimValueAccounts(IConfiguration Configuration)
         {
-            var claimAccounts = Configuration.GetSection("OidcAuth:ClaimValueAccounts").Get<IEnumerable<ClaimValueAccount>>();
+            IEnumerable<ClaimValueAccount> claimAccounts = Configuration.GetSection("OidcAuth:ClaimValueAccounts").Get<IEnumerable<ClaimValueAccount>>();
             return claimAccounts;
         }
     }

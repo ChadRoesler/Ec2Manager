@@ -1,4 +1,4 @@
-﻿using Amazon.EC2.Model;
+﻿using Amazon.RDS.Model;
 using Ec2Manager.Constants;
 using Ec2Manager.Models.ConfigManagement;
 using Ec2Manager.Models.DataManagement;
@@ -10,22 +10,24 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Security.Claims;
 
 namespace Ec2Manager.Controllers
 {
-    public class HomeController : Controller
+    public class RdsManagerController : Controller
     {
         private readonly IConfiguration _configuration;
 
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
+
+        public RdsManagerController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
             _configuration = configuration;
+
         }
 
         [Authorize]
@@ -34,7 +36,7 @@ namespace Ec2Manager.Controllers
             List<ClaimValueAccount> claimAccounts = new();
             IEnumerable<Claim> userClaims = HttpContext.User.Claims;
             string userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value ?? ResourceStrings.NoUserName;
-            _logger.LogInformation(string.Format(MessageStrings.LoadingEc2Instances, userClaimPreferredUserNameValue));
+            _logger.LogInformation(string.Format(MessageStrings.LoadingRdsInstances, userClaimPreferredUserNameValue));
             if (_configuration.GetValue<string>("OidcAuth:ClientAccountManagementClaim") != null)
             {
                 IEnumerable<Claim> userClaimAccountManagement = userClaims.Where(x => x.Type == _configuration.GetValue<string>("OidcAuth:ClientAccountManagementClaim") && !Regex.Match(x.Value, "\\[.*\\]", RegexOptions.IgnoreCase).Success);
@@ -45,15 +47,15 @@ namespace Ec2Manager.Controllers
             }
             else
             {
-                claimAccounts.Add(new ClaimValueAccount { Value = "NoClaims", Accounts = AwsManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName), EnableReboot = _configuration.GetValue<bool>("Ec2Manager:EnableReboot") });
-                claimAccounts.Add(new ClaimValueAccount { Value = "NoClaims", Accounts = AwsManagement.LoadAwsAccounts(_configuration).Select(x => x.AccountName), EnableStop = _configuration.GetValue<bool>("Ec2Manager:EnableStop") });
+                claimAccounts.Add(new ClaimValueAccount { Value = "NoClaims", Accounts = AwsRdsManagement.LoadRdsAwsAccounts(_configuration).Select(x => x.AccountName), EnableReboot = _configuration.GetValue<bool>("RdsManager:EnableReboot") });
+                claimAccounts.Add(new ClaimValueAccount { Value = "NoClaims", Accounts = AwsRdsManagement.LoadRdsAwsAccounts(_configuration).Select(x => x.AccountName), EnableStop = _configuration.GetValue<bool>("RdsManager:EnableStop") });
             }
-            List<Ec2Instance> instances = await AwsManagement.ListEc2InstancesAsync(_configuration, userClaimPreferredUserNameValue);
-            _logger.LogInformation(string.Format(MessageStrings.InitialEc2InstanceCount, instances.Count));
+            List<RdsInstance> rdsInstances = await AwsRdsManagement.ListRdsInstancesAsync(_configuration, userClaimPreferredUserNameValue);
+            _logger.LogInformation(string.Format(MessageStrings.InitialRdsInstanceCount, rdsInstances.Count));
             int pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            Ec2SearchService search = new(instances, claimAccounts);
-            _logger.LogInformation(string.Format(MessageStrings.SearchedEc2InstanceCount, instances.Count, searchtype, query, sortorder));
-            Ec2SearchResult model = search.GetSearchResult(searchtype, query, pageNumber, 5, sortorder);
+            RdsSearchService search = new(rdsInstances, claimAccounts);
+            _logger.LogInformation(string.Format(MessageStrings.SearchedRdsInstanceCount, rdsInstances.Count, searchtype, query, sortorder));
+            RdsSearchResult model = search.GetSearchResult(searchtype, query, pageNumber, 5, sortorder);
             return View(model);
         }
 
@@ -63,10 +65,10 @@ namespace Ec2Manager.Controllers
         {
             IEnumerable<Claim> userClaims = HttpContext.User.Claims;
             string userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
-            _logger.LogInformation(string.Format(MessageStrings.UseEc2rEnable, userClaimPreferredUserNameValue, Id));
+            _logger.LogInformation(string.Format(MessageStrings.UseRdsrEnable, userClaimPreferredUserNameValue, Id));
             int pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            StartInstancesResponse response = await AwsManagement.StartEc2InstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserEc2EnableSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            StartDBInstanceResponse response = await AwsRdsManagement.StartRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+            _logger.LogInformation(string.Format(MessageStrings.UserRdsEnableSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
 
         }
@@ -77,10 +79,10 @@ namespace Ec2Manager.Controllers
         {
             IEnumerable<Claim> userClaims = HttpContext.User.Claims;
             string userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
-            _logger.LogInformation(string.Format(MessageStrings.UserEc2Reboot, userClaimPreferredUserNameValue, Id));
+            _logger.LogInformation(string.Format(MessageStrings.UserRdsReboot, userClaimPreferredUserNameValue, Id));
             int pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            RebootInstancesResponse response = await AwsManagement.RebootEc2InstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserEc2RebootSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            RebootDBInstanceResponse response = await AwsRdsManagement.RebootRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+            _logger.LogInformation(string.Format(MessageStrings.UserRdsRebootSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
 
@@ -90,10 +92,10 @@ namespace Ec2Manager.Controllers
         {
             IEnumerable<Claim> userClaims = HttpContext.User.Claims;
             string userClaimPreferredUserNameValue = userClaims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
-            _logger.LogInformation(string.Format(MessageStrings.UserEc2Stop, userClaimPreferredUserNameValue, Id));
+            _logger.LogInformation(string.Format(MessageStrings.UserRdsStop, userClaimPreferredUserNameValue, Id));
             int pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            StopInstancesResponse response = await AwsManagement.StopEc2InstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserEc2StopSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            StopDBInstanceResponse response = await AwsRdsManagement.StopRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+            _logger.LogInformation(string.Format(MessageStrings.UserRdsStopSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
 
