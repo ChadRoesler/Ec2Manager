@@ -2,6 +2,7 @@ version: 1.0.{build}
 branches:
   only:
   - master
+  - awsmulti
 skip_tags: true
 image: Visual Studio 2022
 configuration: Release
@@ -20,9 +21,9 @@ build:
   publish_wap: true
   verbosity: minimal
 after_build:
-- cmd: dotnet publish Ec2Manager\Ec2Manager.csproj
+- cmd: dotnet publish Ec2Manager\Ec2Manager.csproj --self-contained /p:PublishSingleFil=true
 artifacts:
-- path: '\Ec2Manager\bin\Release\net7.0\publish\'
+- path: '\Ec2Manager\bin\Release\net8.0\publish\'
   name: Ec2Manager
   type: WebDeployPackage
 deploy:
@@ -31,6 +32,4 @@ deploy:
   release: Ec2Manager-v$(appveyor_build_version)
   description: Ec2Manager-v$(appveyor_build_version)
   auth_token:
-    secure: zoaU2+fLG/H7nvO4Qd9QW32NoHUC47fz+61pHlytQr5jgdQIZDcJ4d2TRFS1UOeS
-  repository: ChadRoesler/Ec2Manager
-  artifact: Ec2Manager\bin\Release\net7.0\Ec2Manager.zip
+    secure: wstUVHRabe9ISotWIfasnM1/iL2vJha9FyHoy9BakcCM9FLDWKI2ivjGoPml/ZJQ

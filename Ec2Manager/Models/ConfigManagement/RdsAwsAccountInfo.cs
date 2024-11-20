@@ -1,11 +1,9 @@
-﻿using Ec2Manager.Interfaces;
-
-namespace Ec2Manager.Models.ConfigManagement
+﻿namespace Ec2Manager.Models.ConfigManagement
 {
     /// <summary>
     /// Represents AWS account information for RDS.
     /// </summary>
-    public class RdsAwsAccountInfo : IAwsAccountInfo
+    public class RdsAwsAccountInfo
     {
         /// <summary>
         /// Gets the account name.

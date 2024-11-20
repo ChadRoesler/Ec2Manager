@@ -51,11 +51,11 @@ namespace Ec2Manager.Controllers
             else
             {
                 var ec2Accounts = AwsEc2Management.LoadEc2AwsAccounts(_configuration).Select(x => x.AccountName).ToList();
-                claimAccounts = new List<ClaimValueAccount>
-                    {
+                claimAccounts =
+                    [
                         new ClaimValueAccount { Value = "NoClaims", Accounts = ec2Accounts, EnableReboot = _configuration.GetValue<bool>("Ec2Manager:EnableReboot") },
                         new ClaimValueAccount { Value = "NoClaims", Accounts = ec2Accounts, EnableStop = _configuration.GetValue<bool>("Ec2Manager:EnableStop") }
-                    };
+                    ];
             }
 
             var instances = await AwsEc2Management.ListEc2InstancesAsync(_configuration, userClaimPreferredUserNameValue);

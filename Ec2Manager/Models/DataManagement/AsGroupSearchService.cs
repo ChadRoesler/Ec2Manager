@@ -6,18 +6,18 @@ using System.Text.RegularExpressions;
 
 namespace Ec2Manager.Models.DataManagement
 {
-    public class AsGroupSearchService
+    internal class AsGroupSearchService
     {
         private readonly IEnumerable<AsGroup> asgSearchData;
         private readonly IEnumerable<ClaimValueAccount> claimValueData;
 
-        public AsGroupSearchService(IEnumerable<AsGroup> asgInstances, IEnumerable<ClaimValueAccount> claimValueAccounts)
+        internal AsGroupSearchService(IEnumerable<AsGroup> asgInstances, IEnumerable<ClaimValueAccount> claimValueAccounts)
         {
             asgSearchData = asgInstances;
             claimValueData = claimValueAccounts;
         }
 
-        public AsGroupSearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
+        internal AsGroupSearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
         {
             var masterAccountList = claimValueData.SelectMany(x => x.Accounts).ToHashSet();
             searchType = string.IsNullOrWhiteSpace(searchType) ? "name" : searchType.ToLower();

@@ -1,13 +1,11 @@
-﻿using Ec2Manager.Interfaces;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Ec2Manager.Models.DataManagement
 {
     /// <summary>
     /// Represents an Auto Scaling Group (ASG) in AWS.
     /// </summary>
-    public class AsGroup : IAwsResource
+    public class AsGroup
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AsGroup"/> class.

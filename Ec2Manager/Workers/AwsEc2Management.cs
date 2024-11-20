@@ -15,18 +15,30 @@ using System.Threading.Tasks;
 
 namespace Ec2Manager.Workers
 {
+    /// <summary>
+    /// Provides methods for managing AWS EC2 instances.
+    /// </summary>
     public static class AwsEc2Management
     {
-
+        /// <summary>
+        /// Loads the AWS account information from the configuration.
+        /// </summary>
+        /// <param name="Configuration">The configuration object.</param>
+        /// <returns>A collection of AWS account information.</returns>
         internal static IEnumerable<Ec2AwsAccountInfo> LoadEc2AwsAccounts(IConfiguration Configuration)
         {
-            IEnumerable<Ec2AwsAccountInfo> awsKeys = Configuration.GetSection("Ec2Manager:AwsAccounts").Get<IEnumerable<Ec2AwsAccountInfo>>();
-            return awsKeys;
+            return Configuration.GetSection("Ec2Manager:AwsAccounts").Get<IEnumerable<Ec2AwsAccountInfo>>();
         }
 
+        /// <summary>
+        /// Lists the EC2 instances for the specified user.
+        /// </summary>
+        /// <param name="Configuration">The configuration object.</param>
+        /// <param name="User">The user requesting the list of instances.</param>
+        /// <returns>A list of EC2 instances.</returns>
         internal static async Task<List<Ec2Instance>> ListEc2InstancesAsync(IConfiguration Configuration, string User)
         {
-            List<Ec2Instance> ec2InstancesToManage = new();
+            List<Ec2Instance> ec2InstancesToManage = [];
             IEnumerable<Ec2AwsAccountInfo> accounts = LoadEc2AwsAccounts(Configuration);
 
             foreach (Ec2AwsAccountInfo accountKey in accounts)
@@ -34,9 +46,9 @@ namespace Ec2Manager.Workers
                 try
                 {
                     RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                    AmazonSecurityTokenServiceClient stsClient = new();
+                    using AmazonSecurityTokenServiceClient stsClient = new();
                     string sessionName = string.Format(ResourceStrings.ListAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                    sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                    sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                     AssumeRoleRequest assumeRoleRequest = new()
                     {
                         RoleArn = accountKey.RoleArn,
@@ -44,49 +56,40 @@ namespace Ec2Manager.Workers
                         DurationSeconds = 900
                     };
                     AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                    DescribeInstancesRequest describeRequest = new();
-                    AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
-                    DescribeInstancesResponse describeResponse = await ec2Client.DescribeInstancesAsync(describeRequest);
-                    ec2Client.Dispose();
-                    stsClient.Dispose();
+                    using AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
+                    DescribeInstancesResponse describeResponse = await ec2Client.DescribeInstancesAsync(new DescribeInstancesRequest());
+
                     foreach (Reservation reservation in describeResponse.Reservations)
                     {
                         foreach (Instance instance in reservation.Instances)
                         {
-                            if (instance.Tags.Where(t => t.Key == accountKey.TagToSearch).FirstOrDefault() != null)
+                            var tag = instance.Tags.SingleOrDefault(t => t.Key == accountKey.TagToSearch);
+                            if (tag != null && Regex.Match(tag.Value, accountKey.SearchString).Success)
                             {
-                                if (Regex.Match(instance.Tags.SingleOrDefault(t => t.Key == accountKey.TagToSearch)?.Value, accountKey.SearchString).Success)
+                                string name = instance.Tags.SingleOrDefault(t => t.Key == accountKey.NameTag)?.Value;
+                                string state = instance.State.Name.Value;
+
+                                if (instance.State.Name == InstanceStateName.Running)
                                 {
-                                    string name = instance.Tags.SingleOrDefault(t => t.Key == accountKey.NameTag)?.Value;
-                                    string state = string.Empty;
-                                    if (instance.State.Name == InstanceStateName.Running)
+                                    DescribeInstanceStatusResponse statusResponse = await ec2Client.DescribeInstanceStatusAsync(new DescribeInstanceStatusRequest { InstanceIds = { instance.InstanceId } });
+                                    var instanceStatus = statusResponse.InstanceStatuses.FirstOrDefault();
+                                    if (instanceStatus != null)
                                     {
-                                        stsClient = new AmazonSecurityTokenServiceClient();
-                                        stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                                        ec2Client = new AmazonEC2Client(stsResponse.Credentials, accountRegion);
-                                        DescribeInstanceStatusResponse statusResponse = await ec2Client.DescribeInstanceStatusAsync(new DescribeInstanceStatusRequest { InstanceIds = { instance.InstanceId } });
-                                        ec2Client.Dispose();
-                                        stsClient.Dispose();
-                                        if (string.Equals(statusResponse.InstanceStatuses[0].Status.Status.Value, "impaired", StringComparison.InvariantCultureIgnoreCase) || string.Equals(statusResponse.InstanceStatuses[0].SystemStatus.Status.Value, "impaired", StringComparison.InvariantCultureIgnoreCase))
+                                        if (string.Equals(instanceStatus.Status.Status.Value, "impaired", StringComparison.InvariantCultureIgnoreCase) ||
+                                            string.Equals(instanceStatus.SystemStatus.Status.Value, "impaired", StringComparison.InvariantCultureIgnoreCase))
                                         {
                                             state = "impaired";
                                         }
-                                        else if (string.Equals(statusResponse.InstanceStatuses[0].Status.Status.Value, "initializing", StringComparison.InvariantCultureIgnoreCase) || string.Equals(statusResponse.InstanceStatuses[0].SystemStatus.Status.Value, "initializing", StringComparison.InvariantCultureIgnoreCase))
+                                        else if (string.Equals(instanceStatus.Status.Status.Value, "initializing", StringComparison.InvariantCultureIgnoreCase) ||
+                                                 string.Equals(instanceStatus.SystemStatus.Status.Value, "initializing", StringComparison.InvariantCultureIgnoreCase))
                                         {
                                             state = "initializing";
                                         }
-                                        else
-                                        {
-                                            state = instance.State.Name.Value;
-                                        }
                                     }
-                                    else
-                                    {
-                                        state = instance.State.Name.Value;
-                                    }
-                                    Ec2Instance ec2InstanceToManage = new(name, instance.PrivateIpAddress, instance.InstanceId, state, accountKey.AccountName);
-                                    ec2InstancesToManage.Add(ec2InstanceToManage);
                                 }
+
+                                Ec2Instance ec2InstanceToManage = new(name, instance.PrivateIpAddress, instance.InstanceId, state, accountKey.AccountName);
+                                ec2InstancesToManage.Add(ec2InstanceToManage);
                             }
                         }
                     }
@@ -96,18 +99,26 @@ namespace Ec2Manager.Workers
                     throw new Exception(string.Format(ErrorStrings.ErrorLoadingAccount, accountKey.AccountName, ex.Message), ex);
                 }
             }
-            return ec2InstancesToManage.OrderBy(x => x.Name).ToList();
+            return [.. ec2InstancesToManage.OrderBy(x => x.Name)];
         }
 
+        /// <summary>
+        /// Starts the specified EC2 instance.
+        /// </summary>
+        /// <param name="Configuration">The configuration object.</param>
+        /// <param name="User">The user requesting the start of the instance.</param>
+        /// <param name="AccountName">The name of the AWS account.</param>
+        /// <param name="InstanceId">The ID of the instance to start.</param>
+        /// <returns>The response from the start instances request.</returns>
         internal static async Task<StartInstancesResponse> StartEc2InstanceAsync(IConfiguration Configuration, string User, string AccountName, string InstanceId)
         {
             try
             {
                 Ec2AwsAccountInfo accountKey = LoadEc2AwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                AmazonSecurityTokenServiceClient stsClient = new();
+                using AmazonSecurityTokenServiceClient stsClient = new();
                 string sessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                 AssumeRoleRequest assumeRoleRequest = new()
                 {
                     RoleArn = accountKey.RoleArn,
@@ -115,13 +126,10 @@ namespace Ec2Manager.Workers
                     DurationSeconds = 900
                 };
                 AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                List<string> instanceIdAsList = new() { InstanceId };
+                List<string> instanceIdAsList = [InstanceId];
                 StartInstancesRequest startRequest = new(instanceIdAsList);
-                AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
-                Task<StartInstancesResponse> response = ec2Client.StartInstancesAsync(startRequest);
-                ec2Client.Dispose();
-                stsClient.Dispose();
-                return await response;
+                using AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
+                return await ec2Client.StartInstancesAsync(startRequest);
             }
             catch (Exception e)
             {
@@ -129,15 +137,23 @@ namespace Ec2Manager.Workers
             }
         }
 
+        /// <summary>
+        /// Reboots the specified EC2 instance.
+        /// </summary>
+        /// <param name="Configuration">The configuration object.</param>
+        /// <param name="User">The user requesting the reboot of the instance.</param>
+        /// <param name="AccountName">The name of the AWS account.</param>
+        /// <param name="InstanceId">The ID of the instance to reboot.</param>
+        /// <returns>The response from the reboot instances request.</returns>
         internal static async Task<RebootInstancesResponse> RebootEc2InstanceAsync(IConfiguration Configuration, string User, string AccountName, string InstanceId)
         {
             try
             {
                 Ec2AwsAccountInfo accountKey = LoadEc2AwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                AmazonSecurityTokenServiceClient stsClient = new();
+                using AmazonSecurityTokenServiceClient stsClient = new();
                 string sessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                 AssumeRoleRequest assumeRoleRequest = new()
                 {
                     RoleArn = accountKey.RoleArn,
@@ -145,13 +161,10 @@ namespace Ec2Manager.Workers
                     DurationSeconds = 900
                 };
                 AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                List<string> instanceIdAsList = new() { InstanceId };
+                List<string> instanceIdAsList = [InstanceId];
                 RebootInstancesRequest rebootRequest = new(instanceIdAsList);
-                AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
-                Task<RebootInstancesResponse> response = ec2Client.RebootInstancesAsync(rebootRequest);
-                ec2Client.Dispose();
-                stsClient.Dispose();
-                return await response;
+                using AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
+                return await ec2Client.RebootInstancesAsync(rebootRequest);
             }
             catch (Exception e)
             {
@@ -159,15 +172,23 @@ namespace Ec2Manager.Workers
             }
         }
 
+        /// <summary>
+        /// Stops the specified EC2 instance.
+        /// </summary>
+        /// <param name="Configuration">The configuration object.</param>
+        /// <param name="User">The user requesting the stop of the instance.</param>
+        /// <param name="AccountName">The name of the AWS account.</param>
+        /// <param name="InstanceId">The ID of the instance to stop.</param>
+        /// <returns>The response from the stop instances request.</returns>
         internal static async Task<StopInstancesResponse> StopEc2InstanceAsync(IConfiguration Configuration, string User, string AccountName, string InstanceId)
         {
             try
             {
                 Ec2AwsAccountInfo accountKey = LoadEc2AwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                AmazonSecurityTokenServiceClient stsClient = new();
+                using AmazonSecurityTokenServiceClient stsClient = new();
                 string sessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                 AssumeRoleRequest assumeRoleRequest = new()
                 {
                     RoleArn = accountKey.RoleArn,
@@ -175,19 +196,15 @@ namespace Ec2Manager.Workers
                     DurationSeconds = 900
                 };
                 AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                List<string> instanceIdAsList = new() { InstanceId };
+                List<string> instanceIdAsList = [InstanceId];
                 StopInstancesRequest stopRequest = new(instanceIdAsList);
-                AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
-                Task<StopInstancesResponse> response = ec2Client.StopInstancesAsync(stopRequest);
-                ec2Client.Dispose();
-                stsClient.Dispose();
-                return await response;
+                using AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
+                return await ec2Client.StopInstancesAsync(stopRequest);
             }
             catch (Exception e)
             {
                 throw new Exception(string.Format(ErrorStrings.StopEc2InstanceError, InstanceId, e.Message), e.InnerException);
             }
         }
-
     }
 }

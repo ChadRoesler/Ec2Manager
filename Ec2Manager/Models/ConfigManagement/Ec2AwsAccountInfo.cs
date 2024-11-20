@@ -1,11 +1,9 @@
-﻿using Ec2Manager.Interfaces;
-
-namespace Ec2Manager.Models.ConfigManagement
+﻿namespace Ec2Manager.Models.ConfigManagement
 {
     /// <summary>
     /// Represents AWS account information for EC2.
     /// </summary>
-    public class Ec2AwsAccountInfo : IAwsAccountInfo
+    public class Ec2AwsAccountInfo
     {
         /// <summary>
         /// Gets the account name.

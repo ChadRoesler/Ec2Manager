@@ -50,11 +50,11 @@ namespace Ec2Manager.Controllers
             else
             {
                 var asgAccounts = AwsAsgManagement.LoadAsgAwsAccounts(_configuration).Select(x => x.AccountName).ToList();
-                claimAccounts = new List<ClaimValueAccount>
-                    {
+                claimAccounts =
+                    [
                         new ClaimValueAccount { Value = "NoClaims", Accounts = asgAccounts, EnableReboot = _configuration.GetValue<bool>("AsgManager:EnableReboot") },
                         new ClaimValueAccount { Value = "NoClaims", Accounts = asgAccounts, EnableStop = _configuration.GetValue<bool>("AsgManager:EnableStop") }
-                    };
+                    ];
             }
 
             var asGroups = await AwsAsgManagement.ListAsGroupsAsync(_configuration, userClaimPreferredUserNameValue);
@@ -85,7 +85,7 @@ namespace Ec2Manager.Controllers
         public async Task<IActionResult> RefreashAsync(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaimPreferredUserNameValue = HttpContext.User.Claims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
-            _logger.LogInformation(string.Format(MessageStrings.UserAsgRefresh,userClaimPreferredUserNameValue,Id));
+            _logger.LogInformation(string.Format(MessageStrings.UserAsgRefresh, userClaimPreferredUserNameValue, Id));
 
             var pageNumber = page.GetValueOrDefault(1);
             var response = await AwsAsgManagement.RefreshGroupAsync(_configuration, userClaimPreferredUserNameValue, account, Id);

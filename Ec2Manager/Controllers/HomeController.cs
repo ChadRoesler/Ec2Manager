@@ -20,6 +20,7 @@ namespace Ec2Manager.Controllers
         [Authorize]
         public IActionResult IndexAsync(string searchtype, string query, int? page, string sortorder)
         {
+            _logger.LogInformation("Loading home page");
             return View();
         }
 

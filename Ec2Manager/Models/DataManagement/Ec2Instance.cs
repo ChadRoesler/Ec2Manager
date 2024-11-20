@@ -1,13 +1,11 @@
-﻿using Ec2Manager.Interfaces;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Ec2Manager.Models.DataManagement
 {
     /// <summary>
     /// Represents an EC2 instance in AWS.
     /// </summary>
-    public class Ec2Instance : IAwsResource
+    public class Ec2Instance
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Ec2Instance"/> class.

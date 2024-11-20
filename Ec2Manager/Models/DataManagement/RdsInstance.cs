@@ -1,13 +1,11 @@
-﻿using Ec2Manager.Interfaces;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Ec2Manager.Models.DataManagement
 {
     /// <summary>
     /// Represents an RDS instance in AWS.
     /// </summary>
-    public class RdsInstance : IAwsResource
+    public class RdsInstance
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RdsInstance"/> class.
