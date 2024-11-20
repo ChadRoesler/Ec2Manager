@@ -2,9 +2,27 @@
     ViewData["Title"] = "Home";
 }
 <div class="container">
-    <div class="row">
-        <div class="col-md-6"> @Html.ActionLink("Link to Index action of Ec2Manager controller", "Index", "Ec2Manager")</div>
-        <div class="col-md-6">@Html.ActionLink("Link to Index action of RdsManager controller", "Index", "RdsManager")</div>
-        <div class="col-md-6">@Html.ActionLink("Link to Index action of RdsManager controller", "Index", "AsgManager")</div>
+    <div class="row justify-content-center my-4">
+        <img src="~/images/logo_large.png" alt="Logo" class="img-fluid">
+    </div>
+    <div class="row text-center">
+        <div class="col">
+            <a href="@Url.ActionLink("Index", "Ec2Manager")">
+                <img src="~/images/ec2_manager.png" alt="ec2manager" class="img-fluid mb-2">
+            </a>
+            <p>Ec2 Manager</p>
+        </div>
+        <div class="col">
+            <a href="@Url.ActionLink("Index", "AsgManager")">
+                <img src="~/images/asg_manager.png" alt="asgmanager" class="img-fluid mb-2">
+            </a>
+            <p>Asg Manager</p>
+        </div>
+        <div class="col">
+            <a href="@Url.ActionLink("Index", "RdsManager")">
+                <img src="~/images/rds_manager.png" alt="rdsmanager" class="img-fluid mb-2">
+            </a>
+            <p>Rds Manager</p>
+        </div>
     </div>
 </div>

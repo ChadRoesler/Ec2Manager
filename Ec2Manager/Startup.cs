@@ -112,6 +112,9 @@ namespace Ec2Manager
                 endpoints.MapControllerRoute(
                    name: "RdsManager",
                    pattern: "{controller=RdsManager}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                   name: "AsgManager",
+                   pattern: "{controller=AsgManager}/{action=Index}/{id?}");
 
                 endpoints.MapControllerRoute(name: "Error",
                                                     "error",

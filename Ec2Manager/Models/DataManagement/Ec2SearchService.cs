@@ -8,8 +8,8 @@ namespace Ec2Manager.Models.DataManagement
 {
     public class Ec2SearchService
     {
-        private readonly IEnumerable<Ec2Instance> ec2SearchData = new List<Ec2Instance>();
-        private readonly IEnumerable<ClaimValueAccount> claimValueData = new List<ClaimValueAccount>();
+        private readonly IEnumerable<Ec2Instance> ec2SearchData;
+        private readonly IEnumerable<ClaimValueAccount> claimValueData;
 
         public Ec2SearchService(IEnumerable<Ec2Instance> ec2Instances, IEnumerable<ClaimValueAccount> claimValueAccounts)
         {
@@ -19,25 +19,26 @@ namespace Ec2Manager.Models.DataManagement
 
         public Ec2SearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
         {
-            List<string> masterAccountList = new();
-            claimValueData.ToList().ForEach(x => masterAccountList.AddRange(x.Accounts));
-            searchType = string.IsNullOrWhiteSpace(searchType) ? "name" : searchType;
-            sortOrder = string.IsNullOrWhiteSpace(sortOrder) ? "name" : sortOrder;
+            var masterAccountList = claimValueData.SelectMany(x => x.Accounts).ToHashSet();
+            searchType = string.IsNullOrWhiteSpace(searchType) ? "name" : searchType.ToLower();
+            sortOrder = string.IsNullOrWhiteSpace(sortOrder) ? "name" : sortOrder.ToLower();
             query = string.IsNullOrWhiteSpace(query) ? "" : query;
-            IEnumerable<Ec2Instance> searchHits = ec2SearchData.Where(x => masterAccountList.Contains(x.Account));
+
+            var searchHits = ec2SearchData.Where(x => masterAccountList.Contains(x.Account));
+
             if (!string.IsNullOrWhiteSpace(query))
             {
-                searchHits = (searchType.ToLower()) switch
+                searchHits = searchType switch
                 {
-                    "ipaddress" => searchHits.Where(x => Regex.Match(x.IpAddress, query, RegexOptions.IgnoreCase).Success),
-                    "status" => searchHits.Where(x => Regex.Match(x.Status, query, RegexOptions.IgnoreCase).Success),
-                    "id" => searchHits.Where(x => Regex.Match(x.Id, query, RegexOptions.IgnoreCase).Success),
-                    "account" => searchHits.Where(x => Regex.Match(x.Account, query, RegexOptions.IgnoreCase).Success),
-                    _ => searchHits.Where(x => Regex.Match(x.Name, query, RegexOptions.IgnoreCase).Success),
+                    "ipaddress" => searchHits.Where(x => Regex.IsMatch(x.IpAddress, query, RegexOptions.IgnoreCase)),
+                    "status" => searchHits.Where(x => Regex.IsMatch(x.Status, query, RegexOptions.IgnoreCase)),
+                    "id" => searchHits.Where(x => Regex.IsMatch(x.Id, query, RegexOptions.IgnoreCase)),
+                    "account" => searchHits.Where(x => Regex.IsMatch(x.Account, query, RegexOptions.IgnoreCase)),
+                    _ => searchHits.Where(x => Regex.IsMatch(x.Name, query, RegexOptions.IgnoreCase)),
                 };
             }
 
-            searchHits = (sortOrder.ToLower()) switch
+            searchHits = sortOrder switch
             {
                 "status" => searchHits.OrderBy(x => x.Status),
                 "status_desc" => searchHits.OrderByDescending(x => x.Status),
@@ -50,12 +51,17 @@ namespace Ec2Manager.Models.DataManagement
                 "name_desc" => searchHits.OrderByDescending(x => x.Name),
                 _ => searchHits.OrderBy(x => x.Name),
             };
-            searchHits.ToList().ForEach(x => x.CanReboot = claimValueData.SingleOrDefault(y => y.Accounts.Contains(x.Account) && y.EnableReboot) != null);
-            searchHits.ToList().ForEach(x => x.CanStop = claimValueData.SingleOrDefault(y => y.Accounts.Contains(x.Account) && y.EnableStop) != null);
 
-            Ec2SearchResult searchResult = new()
+            var searchHitsList = searchHits.ToList();
+            foreach (var ec2 in searchHitsList)
             {
-                SearchHits = new StaticPagedList<Ec2Instance>(searchHits.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHits.Count()),
+                ec2.CanReboot = claimValueData.Any(y => y.Accounts.Contains(ec2.Account) && y.EnableReboot);
+                ec2.CanStop = claimValueData.Any(y => y.Accounts.Contains(ec2.Account) && y.EnableStop);
+            }
+
+            var searchResult = new Ec2SearchResult
+            {
+                SearchHits = new StaticPagedList<Ec2Instance>(searchHitsList.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHitsList.Count),
                 SearchQuery = query,
                 Page = page,
                 SortOrder = sortOrder,

@@ -18,8 +18,26 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <img class="img-fluid mr-sm-2" src="~/images/logo.png" height="40" width="40" />
-                <a class="navbar-brand">Ec2 Manager</a>
+                <div class="dropdown ml-2">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img class="img-fluid mr-sm-2" src="~/images/logo.png" height="40" width="40" />
+                        Aws Resource Manager
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item d-flex align-items-center" href="@Url.ActionLink("Index", "Ec2Manager")">
+                            <img src="~/images/ec2_manager.png" height="40" width="40" alt="ec2manager" class="mr-2" />
+                            Ec2 Manager
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="@Url.Action("Index", "AsgManager")">
+                            <img src="~/images/asg_manager.png" height="40" width="40" alt="asgmanager" class="mr-2" />
+                            Asg Manager
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="@Url.ActionLink("Index", "RdsManager")">
+                            <img src="~/images/rds_manager.png" height="40" width="40" alt="rdsmanager" class="mr-2" />
+                            Rds Manager
+                        </a>
+                    </div>
+                </div>
                 @if (ViewData["Title"].ToString() != "Home")
                 {
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -98,6 +116,41 @@
                                         else
                                         {
                                             <option value="endpoint">Endpoint</option>
+                                        }
+                                        @if (ViewData["SearchType"].ToString() == "account")
+                                        {
+                                            <option value="account" selected>Account</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="account">Account</option>
+                                        }
+                                    }
+                                    else if (ViewData["Title"].ToString() == "AsgManager")
+                                    {
+                                        @if (ViewData["SearchType"].ToString() == "name")
+                                        {
+                                            <option value="name" selected>Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="name">Name</option>
+                                        }
+                                        @if (ViewData["SearchType"].ToString() == "status")
+                                        {
+                                            <option value="status" selected>Status</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="status">Status</option>
+                                        }
+                                        @if (ViewData["SearchType"].ToString() == "instancecount")
+                                        {
+                                            <option value="instancecount" selected>Instance Count</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="instancecount">Instance Count</option>
                                         }
                                         @if (ViewData["SearchType"].ToString() == "account")
                                         {

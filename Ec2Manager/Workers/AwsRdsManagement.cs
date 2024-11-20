@@ -1,11 +1,11 @@
 ﻿using Amazon;
+using Amazon.RDS;
+using Amazon.RDS.Model;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
 using Ec2Manager.Constants;
 using Ec2Manager.Models.ConfigManagement;
 using Ec2Manager.Models.DataManagement;
-using Amazon.RDS;
-using Amazon.RDS.Model;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -53,7 +53,7 @@ namespace Ec2Manager.Workers
                         {
                             if (Regex.Match(dbInstance.TagList.SingleOrDefault(t => t.Key == accountKey.TagToSearch)?.Value, accountKey.SearchString).Success)
                             {
-                                RdsInstance rdsInstanceToManage = new(dbInstance.DBInstanceIdentifier, dbInstance.Endpoint.ToString().Replace("rds.amazonaws.com",string.Empty), dbInstance.DBInstanceStatus, accountKey.AccountName);
+                                RdsInstance rdsInstanceToManage = new(dbInstance.DBInstanceIdentifier, dbInstance.Endpoint.ToString().Replace("rds.amazonaws.com", string.Empty), dbInstance.DBInstanceStatus, accountKey.AccountName);
                                 rdsInstancesToManage.Add(rdsInstanceToManage);
                             }
                         }

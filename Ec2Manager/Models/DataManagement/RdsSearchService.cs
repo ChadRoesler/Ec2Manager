@@ -8,8 +8,8 @@ namespace Ec2Manager.Models.DataManagement
 {
     public class RdsSearchService
     {
-        private readonly IEnumerable<RdsInstance> rdsSearchData = new List<RdsInstance>();
-        private readonly IEnumerable<ClaimValueAccount> claimValueData = new List<ClaimValueAccount>();
+        private readonly IEnumerable<RdsInstance> rdsSearchData;
+        private readonly IEnumerable<ClaimValueAccount> claimValueData;
 
         public RdsSearchService(IEnumerable<RdsInstance> rdsInstances, IEnumerable<ClaimValueAccount> claimValueAccounts)
         {
@@ -19,24 +19,25 @@ namespace Ec2Manager.Models.DataManagement
 
         public RdsSearchResult GetSearchResult(string searchType, string query, int page, int pageSize, string sortOrder)
         {
-            List<string> masterAccountList = new();
-            claimValueData.ToList().ForEach(x => masterAccountList.AddRange(x.Accounts));
-            searchType = string.IsNullOrWhiteSpace(searchType) ? "name" : searchType;
-            sortOrder = string.IsNullOrWhiteSpace(sortOrder) ? "name" : sortOrder;
+            var masterAccountList = claimValueData.SelectMany(x => x.Accounts).ToHashSet();
+            searchType = string.IsNullOrWhiteSpace(searchType) ? "name" : searchType.ToLower();
+            sortOrder = string.IsNullOrWhiteSpace(sortOrder) ? "name" : sortOrder.ToLower();
             query = string.IsNullOrWhiteSpace(query) ? "" : query;
-            IEnumerable<RdsInstance> searchHits = rdsSearchData.Where(x => masterAccountList.Contains(x.Account));
+
+            var searchHits = rdsSearchData.Where(x => masterAccountList.Contains(x.Account));
+
             if (!string.IsNullOrWhiteSpace(query))
             {
-                searchHits = (searchType.ToLower()) switch
+                searchHits = searchType switch
                 {
-                    "endpoint" => searchHits.Where(x => Regex.Match(x.Endpoint, query, RegexOptions.IgnoreCase).Success),
-                    "status" => searchHits.Where(x => Regex.Match(x.Status, query, RegexOptions.IgnoreCase).Success),
-                    "account" => searchHits.Where(x => Regex.Match(x.Account, query, RegexOptions.IgnoreCase).Success),
-                    _ => searchHits.Where(x => Regex.Match(x.DbIdentifier, query, RegexOptions.IgnoreCase).Success),
+                    "endpoint" => searchHits.Where(x => Regex.IsMatch(x.Endpoint, query, RegexOptions.IgnoreCase)),
+                    "status" => searchHits.Where(x => Regex.IsMatch(x.Status, query, RegexOptions.IgnoreCase)),
+                    "account" => searchHits.Where(x => Regex.IsMatch(x.Account, query, RegexOptions.IgnoreCase)),
+                    _ => searchHits.Where(x => Regex.IsMatch(x.DbIdentifier, query, RegexOptions.IgnoreCase)),
                 };
             }
 
-            searchHits = (sortOrder.ToLower()) switch
+            searchHits = sortOrder switch
             {
                 "status" => searchHits.OrderBy(x => x.Status),
                 "status_desc" => searchHits.OrderByDescending(x => x.Status),
@@ -47,12 +48,17 @@ namespace Ec2Manager.Models.DataManagement
                 "name_desc" => searchHits.OrderByDescending(x => x.DbIdentifier),
                 _ => searchHits.OrderBy(x => x.DbIdentifier),
             };
-            searchHits.ToList().ForEach(x => x.CanReboot = claimValueData.SingleOrDefault(y => y.Accounts.Contains(x.Account) && y.EnableReboot) != null);
-            searchHits.ToList().ForEach(x => x.CanStop = claimValueData.SingleOrDefault(y => y.Accounts.Contains(x.Account) && y.EnableStop) != null);
 
-            RdsSearchResult searchResult = new()
+            var searchHitsList = searchHits.ToList();
+            foreach (var rds in searchHitsList)
             {
-                SearchHits = new StaticPagedList<RdsInstance>(searchHits.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHits.Count()),
+                rds.CanReboot = claimValueData.Any(y => y.Accounts.Contains(rds.Account) && y.EnableReboot);
+                rds.CanStop = claimValueData.Any(y => y.Accounts.Contains(rds.Account) && y.EnableStop);
+            }
+
+            var searchResult = new RdsSearchResult
+            {
+                SearchHits = new StaticPagedList<RdsInstance>(searchHitsList.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHitsList.Count),
                 SearchQuery = query,
                 Page = page,
                 SortOrder = sortOrder,

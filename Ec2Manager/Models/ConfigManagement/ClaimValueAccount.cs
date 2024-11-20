@@ -2,13 +2,29 @@
 
 namespace Ec2Manager.Models.ConfigManagement
 {
+    /// <summary>
+    /// Represents a claim value account configuration.
+    /// </summary>
     public class ClaimValueAccount
     {
-        public string Value { get; set; }
-        public IEnumerable<string> Accounts { get; set; }
+        /// <summary>
+        /// Gets the claim value.
+        /// </summary>
+        public string Value { get; init; }
 
-        public bool EnableReboot { get; set; } = false;
+        /// <summary>
+        /// Gets the list of associated accounts.
+        /// </summary>
+        public IEnumerable<string> Accounts { get; init; }
 
-        public bool EnableStop { get; set; } = false;
+        /// <summary>
+        /// Gets a value indicating whether reboot is enabled.
+        /// </summary>
+        public bool EnableReboot { get; init; } = false;
+
+        /// <summary>
+        /// Gets a value indicating whether stop is enabled.
+        /// </summary>
+        public bool EnableStop { get; init; } = false;
     }
 }

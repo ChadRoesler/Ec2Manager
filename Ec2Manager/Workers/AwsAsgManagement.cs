@@ -1,18 +1,17 @@
 ﻿using Amazon;
+using Amazon.AutoScaling;
+using Amazon.AutoScaling.Model;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
 using Ec2Manager.Constants;
 using Ec2Manager.Models.ConfigManagement;
 using Ec2Manager.Models.DataManagement;
-using Amazon.AutoScaling;
-using Amazon.AutoScaling.Model;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Amazon.RDS.Model;
 
 namespace Ec2Manager.Workers
 {
@@ -36,7 +35,7 @@ namespace Ec2Manager.Workers
                     RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
                     AmazonSecurityTokenServiceClient stsClient = new();
                     string sessionName = string.Format(ResourceStrings.ListAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                    sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                    sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                     AssumeRoleRequest assumeRoleRequest = new()
                     {
                         RoleArn = accountKey.RoleArn,
@@ -61,147 +60,19 @@ namespace Ec2Manager.Workers
                                     RoleSessionName = sessionName,
                                     DurationSeconds = 900
                                 };
+                                stsClient = new AmazonSecurityTokenServiceClient();
+                                int.TryParse(group.Tags.SingleOrDefault(t => t.Key == accountKey.DesiredCapacityTag)?.Value ?? "1", out int desiredCapacity);
+                                int.TryParse(group.Tags.SingleOrDefault(t => t.Key == accountKey.MaxCapacityTag)?.Value ?? "1", out int maxCapacity);
+                                int.TryParse(group.Tags.SingleOrDefault(t => t.Key == accountKey.MinCapacityTag)?.Value ?? "1", out int minCapacity);
                                 AssumeRoleResponse stsResponseIr = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                                DescribeInstanceRefreshesRequest describeIrRequest = new DescribeInstanceRefreshesRequest() { AutoScalingGroupName = group.AutoScalingGroupName };
-                                AmazonAutoScalingClient asgClientIr = new(stsResponseIr.Credentials, accountRegion);
+                                DescribeInstanceRefreshesRequest describeIrRequest = new() { AutoScalingGroupName = group.AutoScalingGroupName };
+                                asgClient = new(stsResponseIr.Credentials, accountRegion);
                                 DescribeInstanceRefreshesResponse describeResponseIr = await asgClient.DescribeInstanceRefreshesAsync(describeIrRequest);
-                                AsGroup asGroupToManage = new(group.AutoScalingGroupName, group.Instances.Count(), (describeResponseIr.InstanceRefreshes.OrderBy( x => x.StartTime).ToArray()[0].Status == InstanceRefreshStatus.InProgress), accountKey.AccountName);
+                                asgClient.Dispose();
+                                stsClient.Dispose();
+                                bool refreshStatus = (describeResponseIr.InstanceRefreshes.OrderBy(x => x.StartTime).ToArray().FirstOrDefault() != null ? (describeResponseIr.InstanceRefreshes.OrderBy(x => x.StartTime).ToArray().FirstOrDefault()?.Status == InstanceRefreshStatus.InProgress) : false);
+                                AsGroup asGroupToManage = new(group.AutoScalingGroupName, group.Instances.Count, refreshStatus, accountKey.AccountName, desiredCapacity, maxCapacity, minCapacity);
                                 asGroupsToManage.Add(asGroupToManage);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                throw new Exception(string.Format(ErrorStrings.ErrorLoadingAccount, accountKey.AccountName, ex.Message), ex);
-            }
-            }
-            return asGroupsToManage.OrderBy(x => x.Name).ToList();
-        }
-
-        internal static async Task<StartInstancesResponse> StartEc2InstanceAsync(IConfiguration Configuration, string User, string AccountName, string InstanceId)
-        {
-            try
-            {
-                AsgAwsAccountInfo accountKey = LoadAsgAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
-                RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                AmazonSecurityTokenServiceClient stsClient = new();
-                string sessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
-                AssumeRoleRequest assumeRoleRequest = new()
-                {
-                    RoleArn = accountKey.RoleArn,
-                    RoleSessionName = sessionName,
-                    DurationSeconds = 900
-                };
-                AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                List<string> instanceIdAsList = new() { InstanceId };
-                StartInstancesRequest startRequest = new(instanceIdAsList);
-                AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
-                Task<StartInstancesResponse> response = ec2Client.StartInstancesAsync(startRequest);
-                ec2Client.Dispose();
-                stsClient.Dispose();
-                return await response;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, InstanceId, e.Message), e.InnerException);
-            }
-        }
-
-        internal static async Task<RebootInstancesResponse> RebootEc2InstanceAsync(IConfiguration Configuration, string User, string AccountName, string InstanceId)
-        {
-            try
-            {
-                Ec2AwsAccountInfo accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
-                RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                AmazonSecurityTokenServiceClient stsClient = new();
-                string sessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
-                AssumeRoleRequest assumeRoleRequest = new()
-                {
-                    RoleArn = accountKey.RoleArn,
-                    RoleSessionName = sessionName,
-                    DurationSeconds = 900
-                };
-                AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                List<string> instanceIdAsList = new() { InstanceId };
-                RebootInstancesRequest rebootRequest = new(instanceIdAsList);
-                AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
-                Task<RebootInstancesResponse> response = ec2Client.RebootInstancesAsync(rebootRequest);
-                ec2Client.Dispose();
-                stsClient.Dispose();
-                return await response;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(string.Format(ErrorStrings.RebootEc2InstanceError, InstanceId, e.Message), e.InnerException);
-            }
-        }
-
-        internal static async Task<StopInstancesResponse> StopEc2InstanceAsync(IConfiguration Configuration, string User, string AccountName, string InstanceId)
-        {
-            try
-            {
-                Ec2AwsAccountInfo accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
-                RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                AmazonSecurityTokenServiceClient stsClient = new();
-                string sessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
-                AssumeRoleRequest assumeRoleRequest = new()
-                {
-                    RoleArn = accountKey.RoleArn,
-                    RoleSessionName = sessionName,
-                    DurationSeconds = 900
-                };
-                AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                List<string> instanceIdAsList = new() { InstanceId };
-                StopInstancesRequest stopRequest = new(instanceIdAsList);
-                AmazonEC2Client ec2Client = new(stsResponse.Credentials, accountRegion);
-                Task<StopInstancesResponse> response = ec2Client.StopInstancesAsync(stopRequest);
-                ec2Client.Dispose();
-                stsClient.Dispose();
-                return await response;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(string.Format(ErrorStrings.StopEc2InstanceError, InstanceId, e.Message), e.InnerException);
-            }
-        }
-
-        internal static async Task<List<RdsInstance>> ListRdsInstancesAsync(IConfiguration Configuration, string User)
-        {
-            List<RdsInstance> rdsInstancesToManage = new();
-            IEnumerable<Ec2AwsAccountInfo> accounts = LoadAwsAccounts(Configuration);
-
-            foreach (Ec2AwsAccountInfo accountKey in accounts)
-            {
-                try
-                {
-                    RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
-                    AmazonSecurityTokenServiceClient stsClient = new();
-                    string sessionName = string.Format(ResourceStrings.ListAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                    sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
-                    AssumeRoleRequest assumeRoleRequest = new()
-                    {
-                        RoleArn = accountKey.RoleArn,
-                        RoleSessionName = sessionName,
-                        DurationSeconds = 900
-                    };
-                    AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                    DescribeDBInstancesRequest describeRequest = new();
-                    AmazonRDSClient rdsClient = new(stsResponse.Credentials, accountRegion);
-                    var describeResponse = await rdsClient.DescribeDBInstancesAsync(describeRequest);
-                    rdsClient.Dispose();
-                    stsClient.Dispose();
-                    foreach (DBInstance dbInstance in describeResponse.DBInstances)
-                    {
-                        if (dbInstance.TagList.Where(t => t.Key == accountKey.TagToSearch).FirstOrDefault() != null)
-                        {
-                            if (Regex.Match(dbInstance.TagList.SingleOrDefault(t => t.Key == accountKey.TagToSearch)?.Value, accountKey.SearchString).Success)
-                            {
-                                RdsInstance rdsInstanceToManage = new(dbInstance.DBInstanceIdentifier, dbInstance.Endpoint.ToString().Replace("rds.amazonaws.com",string.Empty), dbInstance.DBInstanceStatus, accountKey.AccountName);
-                                rdsInstancesToManage.Add(rdsInstanceToManage);
                             }
                         }
                     }
@@ -211,18 +82,18 @@ namespace Ec2Manager.Workers
                     throw new Exception(string.Format(ErrorStrings.ErrorLoadingAccount, accountKey.AccountName, ex.Message), ex);
                 }
             }
-            return rdsInstancesToManage.OrderBy(x => x.DbIdentifier).ToList();
+            return asGroupsToManage.OrderBy(x => x.Name).ToList();
         }
 
-        internal static async Task<StartDBInstanceResponse> StartRdsInstanceAsync(IConfiguration Configuration, string User, string AccountName, string DbIdentifier)
+        internal static async Task<UpdateAutoScalingGroupResponse> StartGroupAsync(IConfiguration Configuration, string User, string AccountName, string GroupName, int DesiredCapacity, int MaxCapacity, int MinCapacity)
         {
             try
             {
-                Ec2AwsAccountInfo accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
+                AsgAwsAccountInfo accountKey = LoadAsgAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
                 AmazonSecurityTokenServiceClient stsClient = new();
                 string sessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                 AssumeRoleRequest assumeRoleRequest = new()
                 {
                     RoleArn = accountKey.RoleArn,
@@ -230,28 +101,28 @@ namespace Ec2Manager.Workers
                     DurationSeconds = 900
                 };
                 AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                StartDBInstanceRequest startRequest = new() { DBInstanceIdentifier = DbIdentifier };
-                AmazonRDSClient rdsClient = new(stsResponse.Credentials, accountRegion);
-                Task<StartDBInstanceResponse> response = rdsClient.StartDBInstanceAsync(startRequest);
-                rdsClient.Dispose();
+                UpdateAutoScalingGroupRequest updateAutoScalingGroupRequest = new() { AutoScalingGroupName = GroupName, DesiredCapacity = DesiredCapacity, MaxSize = MaxCapacity, MinSize = MinCapacity };
+                AmazonAutoScalingClient asgClient = new(stsResponse.Credentials, accountRegion);
+                Task<UpdateAutoScalingGroupResponse> response = asgClient.UpdateAutoScalingGroupAsync(updateAutoScalingGroupRequest);
+                asgClient.Dispose();
                 stsClient.Dispose();
                 return await response;
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format(ErrorStrings.StartRdsInstanceError, DbIdentifier, e.Message), e.InnerException);
+                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, GroupName, e.Message), e.InnerException);
             }
         }
 
-        internal static async Task<RebootDBInstanceResponse> RebootRdsInstanceAsync(IConfiguration Configuration, string User, string AccountName, string DbIdentifier)
+        internal static async Task<StartInstanceRefreshResponse> RefreshGroupAsync(IConfiguration Configuration, string User, string AccountName, string GroupName)
         {
             try
             {
-                Ec2AwsAccountInfo accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
+                AsgAwsAccountInfo accountKey = LoadAsgAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
                 AmazonSecurityTokenServiceClient stsClient = new();
-                string sessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                string sessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                 AssumeRoleRequest assumeRoleRequest = new()
                 {
                     RoleArn = accountKey.RoleArn,
@@ -259,28 +130,28 @@ namespace Ec2Manager.Workers
                     DurationSeconds = 900
                 };
                 AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                RebootDBInstanceRequest rebootRequest = new(DbIdentifier);
-                AmazonRDSClient rdsClient = new(stsResponse.Credentials, accountRegion);
-                Task<RebootDBInstanceResponse> response = rdsClient.RebootDBInstanceAsync(rebootRequest);
-                rdsClient.Dispose();
+                StartInstanceRefreshRequest instanceRefreshRequest = new() { AutoScalingGroupName = GroupName };
+                AmazonAutoScalingClient asgClient = new(stsResponse.Credentials, accountRegion);
+                StartInstanceRefreshResponse response = await asgClient.StartInstanceRefreshAsync(instanceRefreshRequest);
+                asgClient.Dispose();
                 stsClient.Dispose();
-                return await response;
+                return response;
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format(ErrorStrings.RebootRdsInstanceError, DbIdentifier, e.Message), e.InnerException);
+                throw new Exception(string.Format(ErrorStrings.RebootEc2InstanceError, GroupName, e.Message), e.InnerException);
             }
         }
 
-        internal static async Task<StopDBInstanceResponse> StopRdsInstanceAsync(IConfiguration Configuration, string User, string AccountName, string DbIdentifier)
+        internal static async Task<UpdateAutoScalingGroupResponse> StopGroupAsync(IConfiguration Configuration, string User, string AccountName, string GroupName)
         {
             try
             {
-                Ec2AwsAccountInfo accountKey = LoadAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
+                AsgAwsAccountInfo accountKey = LoadAsgAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
                 RegionEndpoint accountRegion = RegionEndpoint.GetBySystemName(accountKey.Region);
                 AmazonSecurityTokenServiceClient stsClient = new();
-                string sessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
-                sessionName = sessionName.Length > 63 ? sessionName.Substring(0, 63) : sessionName;
+                string sessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
                 AssumeRoleRequest assumeRoleRequest = new()
                 {
                     RoleArn = accountKey.RoleArn,
@@ -288,22 +159,17 @@ namespace Ec2Manager.Workers
                     DurationSeconds = 900
                 };
                 AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
-                StopDBInstanceRequest stopRequest = new() { DBInstanceIdentifier = DbIdentifier };
-                AmazonRDSClient rdsClient = new(stsResponse.Credentials, accountRegion);
-                Task<StopDBInstanceResponse> response = rdsClient.StopDBInstanceAsync(stopRequest);
-                rdsClient.Dispose();
+                UpdateAutoScalingGroupRequest updateAutoScalingGroupRequest = new() { AutoScalingGroupName = GroupName, DesiredCapacity = 0, MinSize = 0 };
+                AmazonAutoScalingClient asgClient = new(stsResponse.Credentials, accountRegion);
+                Task<UpdateAutoScalingGroupResponse> response = asgClient.UpdateAutoScalingGroupAsync(updateAutoScalingGroupRequest);
+                asgClient.Dispose();
                 stsClient.Dispose();
                 return await response;
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format(ErrorStrings.StopRdsInstanceError, DbIdentifier, e.Message), e.InnerException);
+                throw new Exception(string.Format(ErrorStrings.StartEc2InstanceError, GroupName, e.Message), e.InnerException);
             }
-        }
-
-        internal static async Task<> ListAsGroupsAsync(IConfiguration Configuration, string User)
-        {
-
         }
     }
 }
