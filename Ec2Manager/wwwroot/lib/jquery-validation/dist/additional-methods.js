@@ -238,9 +238,9 @@ $.validator.addMethod( "cifES", function( value, element ) {
 	}
 
 	all_sum = even_sum + odd_sum;
-	control_digit = ( 10 - ( all_sum ).toString().substr( -1 ) ).toString();
+	control_digit = (10 - (all_sum).toString().substring( -1 ) ).toString();
 	control_digit = parseInt( control_digit, 10 ) > 9 ? "0" : control_digit;
-	control_letter = "JABCDEFGHI".substr( control_digit, 1 ).toString();
+	control_letter = "JABCDEFGHI".substring( control_digit, 1 ).toString();
 
 	// Control must be a digit
 	if ( letter.match( /[ABEH]/ ) ) {
@@ -727,7 +727,7 @@ $.validator.addMethod( "nieES", function( value, element ) {
 
 	var nieRegEx = new RegExp( /^[MXYZ]{1}[0-9]{7,8}[TRWAGMYFPDXBNJZSQVHLCKET]{1}$/gi );
 	var validChars = "TRWAGMYFPDXBNJZSQVHLCKET",
-		letter = value.substr( value.length - 1 ).toUpperCase(),
+		letter = value.substring( value.length - 1 ).toUpperCase(),
 		number;
 
 	value = value.toString().toUpperCase();
@@ -744,7 +744,7 @@ $.validator.addMethod( "nieES", function( value, element ) {
 		.replace( /^[Y]/, "1" )
 		.replace( /^[Z]/, "2" );
 
-	number = value.length === 9 ? value.substr( 0, 8 ) : value.substr( 0, 9 );
+	number = value.length === 9 ? value.substring(0, 8) : value.substring( 0, 9 );
 
 	return validChars.charAt( parseInt( number, 10 ) % 23 ) === letter;
 

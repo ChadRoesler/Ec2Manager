@@ -3,23 +3,21 @@
 namespace Ec2Manager.Models.DataManagement
 {
     /// <summary>
-    /// Represents an EC2 instance in AWS.
+    /// Represents an RDS instance in AWS.
     /// </summary>
-    public class Ec2Instance
+    public class RdsInstance
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Ec2Instance"/> class.
+        /// Initializes a new instance of the <see cref="RdsInstance"/> class.
         /// </summary>
-        /// <param name="name">The name of the EC2 instance.</param>
-        /// <param name="ipAddress">The IP address of the EC2 instance.</param>
-        /// <param name="id">The ID of the EC2 instance.</param>
-        /// <param name="status">The status of the EC2 instance.</param>
+        /// <param name="dbIdentifier">The database identifier of the RDS instance.</param>
+        /// <param name="endpoint">The endpoint of the RDS instance.</param>
+        /// <param name="status">The status of the RDS instance.</param>
         /// <param name="accountName">The name of the AWS account.</param>
-        public Ec2Instance(string name, string ipAddress, string id, string status, string accountName)
+        public RdsInstance(string dbIdentifier, string endpoint, string status, string accountName)
         {
-            Name = name;
-            IpAddress = ipAddress;
-            Id = id;
+            DbIdentifier = dbIdentifier;
+            Endpoint = endpoint;
             Status = status;
             Account = accountName;
         }
@@ -46,34 +44,28 @@ namespace Ec2Manager.Models.DataManagement
         public string Account { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the EC2 instance.
+        /// Gets or sets the database identifier of the RDS instance.
         /// </summary>
-        public string Name { get; set; }
+        [Display(Name = "Name")]
+        public string DbIdentifier { get; set; }
 
         /// <summary>
-        /// Gets or sets the IP address of the EC2 instance.
+        /// Gets or sets the endpoint of the RDS instance.
         /// </summary>
-        [Display(Name = "Ip Address")]
-        public string IpAddress { get; set; }
+        public string Endpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the ID of the EC2 instance.
-        /// </summary>
-        [Display(Name = "Instance Id")]
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the status of the EC2 instance.
+        /// Gets or sets the status of the RDS instance.
         /// </summary>
         public string Status { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the EC2 instance can be rebooted.
+        /// Gets or sets a value indicating whether the RDS instance can be rebooted.
         /// </summary>
         public bool CanReboot { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the EC2 instance can be stopped.
+        /// Gets or sets a value indicating whether the RDS instance can be stopped.
         /// </summary>
         public bool CanStop { get; set; } = false;
     }

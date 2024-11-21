@@ -1,0 +1,183 @@
+﻿@using Microsoft.Extensions.Configuration
+@using PagedList.Core
+@using PagedList.Core.Mvc
+@using Ec2Manager.Models.DataManagement
+@inject IConfiguration Configuration
+@model AsGroupSearchResult
+@{
+    ViewData["Title"] = "AsgManager";
+    ViewData["SearchQuery"] = Model.SearchQuery;
+    ViewData["SearchType"] = Model.SearchType;
+}
+@{
+    var hasResult = Model.SearchHits != null && Model.SearchHits.TotalItemCount > 0;
+}
+@if (!hasResult)
+{
+    <div class="text-center">
+        <img class="figure-img" src="~/images/warning.png" />
+        <p>No matches were found for <strong>"@Model.SearchQuery"</strong> in <strong>"@Model.SearchType"</strong></p>
+        <a asp-action="Index" asp-controller="AsgManager">
+            Return to List
+        </a>
+    </div>
+}
+@if (hasResult)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                </th>
+                <th>
+                    @if (Model.SortOrder == "name")
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name_desc">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="name">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Name)
+                        </a>
+                    }
+                </th>
+                <th>
+                    @if (Model.SortOrder == "account")
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account_desc">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="account">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Account)
+                        </a>
+                    }
+                </th>
+                <th>
+                    @if (Model.SortOrder == "status")
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status_desc">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="status">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Status)
+                        </a>
+                    }
+
+                </th>
+                <th>
+                    @if (Model.SortOrder == "instancecount")
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().InstanceCount)
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
+                            @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().InstanceCount)
+                        </a>
+                    }
+                </th>
+                <th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SearchHits)
+            {
+                <tr>
+                    <td>
+                        <img src="@Url.Content(item.StatusImage)" alt="statusimage" sizes="" />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Account)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.InstanceCount)
+                    </td>
+                    <td>
+                        @if (@item.Status.Equals("stopped"))
+                        {
+                            <a asp-action="Enable" asp-route-id="@item.Name" asp-route-account="@item.Account" asp-route-desiredcapacity="@item.DesiredCapacityValue" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
+                        }
+                        @if (@item.CanRefresh && @item.Status.Equals("running"))
+                        {
+                            <a asp-action="Refresh" class="btn btn-primary btn-warning" data-toggle="modal" data-target="#refreshModal-@item.Name">Refresh</a>
+                            <div class="modal fade" id="refreshModal-@item.Name" tabindex="-1" role="dialog" aria-labelledby="refreshModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="refreshModalLabel">Refresh Instance</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        @using (Html.BeginForm("Refresh", "AsgManager", new { Id = item.Name, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
+                                        {
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to refresh Group: @item.Name?</p>
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">Refresh</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (item.CanStop && item.Status.Equals("running"))
+                        { 
+                            <a asp-action="Stop" class="btn btn-primary btn-danger" data-toggle="modal" data-target="#stopModal-@item.Name">Stop</a>
+                            <div class="modal fade" id="stopModal-@item.Name" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="stopModalLabel">Stop Instance</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        @using (Html.BeginForm("Stop", "AsgManager", new { Id = item.Name, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
+                                        {
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to stop Group: @item.Name?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">Stop</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
+
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white">
+        <div class="container">
+            <pager class="pager-container" list="@Model.SearchHits" options="@PagedListRenderOptions.Bootstrap4PageNumbersPlusPrevAndNext" asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="@Model.SortOrder" />
+        </div>
+    </nav>
+}
+

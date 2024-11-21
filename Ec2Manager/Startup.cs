@@ -46,7 +46,7 @@ namespace Ec2Manager
                     options.ClientSecret = Configuration["OidcAuth:ClientSecret"];
                     options.ResponseType = OpenIdConnectResponseType.Code;
                     options.GetClaimsFromUserInfoEndpoint = true;
-                    foreach (var scope in Configuration.GetSection("OidcAuth:ClientScopes").Get<List<string>>())
+                    foreach (string scope in Configuration.GetSection("OidcAuth:ClientScopes").Get<List<string>>())
                     {
                         options.Scope.Add(scope);
                     }
@@ -101,16 +101,20 @@ namespace Ec2Manager
                 app.UseAuthentication();
             }
             app.UseAuthorization();
-
-            ///////////////////////////////////////////
-            /// Commented out until Okta asp.net 3.0
-            /////////////////////////////////////////
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                   name: "Ec2Manager",
+                   pattern: "{controller=Ec2Manager}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                   name: "RdsManager",
+                   pattern: "{controller=RdsManager}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                   name: "AsgManager",
+                   pattern: "{controller=AsgManager}/{action=Index}/{id?}");
 
                 endpoints.MapControllerRoute(name: "Error",
                                                     "error",
