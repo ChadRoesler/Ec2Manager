@@ -13,6 +13,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Ec2Manager
 {
@@ -25,22 +28,39 @@ namespace Ec2Manager
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHealthChecks();
-            if (Configuration["OidcAuth:Domain"] != null)
+            var oidcDomain = Configuration["OidcAuth:Domain"] ?? string.Empty;
+            if (!string.IsNullOrEmpty(oidcDomain))
             {
                 services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 })
-                .AddCookie()
+                .AddCookie(options =>
+                {
+                    options.Events.OnSigningIn = async context =>
+                    {
+                        var claimsIdentity = (ClaimsIdentity)context.Principal.Identity;
+                        var claimsToKeep = new List<string> { "name", "userrole", "preferred_username" }; // Add essential claims here
+                        var claimsToRemove = claimsIdentity.Claims
+                            .Where(claim => !claimsToKeep.Contains(claim.Type))
+                            .ToList();
+
+                        foreach (var claim in claimsToRemove)
+                        {
+                            claimsIdentity.RemoveClaim(claim);
+                        }
+
+                        await Task.CompletedTask;
+                    };
+                })
                 .AddOpenIdConnect(options =>
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.Authority = Configuration["OidcAuth:Domain"];
+                    options.Authority = oidcDomain;
                     options.RequireHttpsMetadata = true;
                     options.ClientId = Configuration["OidcAuth:ClientId"];
                     options.ClientSecret = Configuration["OidcAuth:ClientSecret"];
@@ -62,17 +82,14 @@ namespace Ec2Manager
             }
             else
             {
-                services.AddAuthorization(options =>
-                {
-                    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                services.AddAuthorizationBuilder()
+                    .SetDefaultPolicy(new AuthorizationPolicyBuilder()
                         .RequireAssertion(_ => true)
-                        .Build();
-                });
+                        .Build());
             }
             services.AddControllersWithViews();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory log)
         {
             log.AddLog4Net();
@@ -82,7 +99,6 @@ namespace Ec2Manager
             }
             else
             {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
                 app.UseStatusCodePages();
                 app.UseMiddleware<ErrorHandler>();
@@ -96,7 +112,7 @@ namespace Ec2Manager
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
             });
             app.UseRouting();
-            if (Configuration["OidcAuth:Domain"] != null)
+            if (!string.IsNullOrEmpty(Configuration["OidcAuth:Domain"]))
             {
                 app.UseAuthentication();
             }
@@ -115,14 +131,12 @@ namespace Ec2Manager
                 endpoints.MapControllerRoute(
                    name: "AsgManager",
                    pattern: "{controller=AsgManager}/{action=Index}/{id?}");
-
                 endpoints.MapControllerRoute(name: "Error",
-                                                    "error",
-                                                    new { controller = "Home", action = "Error" });
-
+                                             pattern: "error",
+                                             defaults: new { controller = "Home", action = "Error" });
                 endpoints.MapControllerRoute(name: "PageNotFound",
-                                                "pagenotfound",
-                                                new { controller = "Home", action = "PageNotFound" });
+                                             pattern: "pagenotfound",
+                                             defaults: new { controller = "Home", action = "PageNotFound" });
                 endpoints.MapHealthChecks("/healthcheck");
             });
         }
