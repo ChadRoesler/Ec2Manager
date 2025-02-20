@@ -32,6 +32,7 @@ namespace Ec2Manager
         {
             services.AddHealthChecks();
             var oidcDomain = Configuration["OidcAuth:Domain"] ?? string.Empty;
+            var accountClaim = Configuration["OidcAuth:ClientAccountManagementClaim"] ?? string.Empty;
             if (!string.IsNullOrEmpty(oidcDomain))
             {
                 services.AddAuthentication(options =>
@@ -44,7 +45,11 @@ namespace Ec2Manager
                     options.Events.OnSigningIn = async context =>
                     {
                         var claimsIdentity = (ClaimsIdentity)context.Principal.Identity;
-                        var claimsToKeep = new List<string> { "name", "userrole", "preferred_username" }; // Add essential claims here
+                        var claimsToKeep = new List<string> { "name", "userrole", "preferred_username" };
+                        if (!string.IsNullOrEmpty(accountClaim))
+                        {
+                            claimsToKeep.Add(accountClaim);
+                        }
                         var claimsToRemove = claimsIdentity.Claims
                             .Where(claim => !claimsToKeep.Contains(claim.Type))
                             .ToList();
