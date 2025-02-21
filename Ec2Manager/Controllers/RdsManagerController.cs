@@ -61,54 +61,78 @@ namespace Ec2Manager.Controllers
                     };
             }
 
-            var rdsInstances = await AwsRdsManagement.ListRdsInstancesAsync(_configuration, userClaimPreferredUserNameValue);
-            _logger.LogInformation(string.Format(MessageStrings.InitialRdsInstanceCount, rdsInstances.Count));
+            var rdsObjects = await AwsRdsManagement.ListRdsInstancesAsync(_configuration, userClaimPreferredUserNameValue);
+            _logger.LogInformation(string.Format(MessageStrings.InitialRdsInstanceCount, rdsObjects.Count));
 
             var pageNumber = page.GetValueOrDefault(1);
-            var search = new RdsSearchService(rdsInstances, claimAccounts);
-            _logger.LogInformation(string.Format(MessageStrings.SearchedRdsInstanceCount, rdsInstances.Count, searchtype, query, sortorder));
+            var search = new RdsSearchService(rdsObjects, claimAccounts);
+            _logger.LogInformation(string.Format(MessageStrings.SearchedRdsInstanceCount, rdsObjects.Count, searchtype, query, sortorder));
 
             RdsSearchResult model = search.GetSearchResult(searchtype, query, pageNumber, 5, sortorder);
             return View(model);
         }
 
         [Authorize]
-        public async Task<IActionResult> EnableAsync(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
+        public async Task<IActionResult> EnableAsync(string Id, bool isCluster, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaimPreferredUserNameValue = HttpContext.User.Claims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserRdsEnable, userClaimPreferredUserNameValue, Id));
 
             var pageNumber = page.GetValueOrDefault(1);
-            var response = await AwsRdsManagement.StartRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserRdsEnableSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            if(isCluster)
+            {
+                var response = await AwsRdsManagement.StartRdsClusterAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+                _logger.LogInformation(string.Format(MessageStrings.UserRdsEnableSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            }
+            else
+            {
+                var response = await AwsRdsManagement.StartRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+                _logger.LogInformation(string.Format(MessageStrings.UserRdsEnableSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            }
 
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> RebootAsync(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
+        public async Task<IActionResult> RebootAsync(string Id, bool isCluster, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaimPreferredUserNameValue = HttpContext.User.Claims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserRdsReboot, userClaimPreferredUserNameValue, Id));
 
             var pageNumber = page.GetValueOrDefault(1);
-            var response = await AwsRdsManagement.RebootRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserRdsRebootSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            if (isCluster)
+            {
+                var response = await AwsRdsManagement.RebootRdsClusterAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+                _logger.LogInformation(string.Format(MessageStrings.UserRdsRebootSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            }
+            else
+            {
+                var response = await AwsRdsManagement.RebootRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+                _logger.LogInformation(string.Format(MessageStrings.UserRdsRebootSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            }
 
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> StopAsync(string Id, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
+        public async Task<IActionResult> StopAsync(string Id, bool isCluster, string account, string searchtype, string query, int? page, string sortorder, string pagesize)
         {
             var userClaimPreferredUserNameValue = HttpContext.User.Claims.SingleOrDefault(x => x.Type == ResourceStrings.UserClaimPreferredUserName)?.Value;
             _logger.LogInformation(string.Format(MessageStrings.UserRdsStop, userClaimPreferredUserNameValue, Id));
 
             var pageNumber = page.GetValueOrDefault(1);
-            var response = await AwsRdsManagement.StopRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
-            _logger.LogInformation(string.Format(MessageStrings.UserRdsStopSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            if (isCluster)
+            {
+                var response = await AwsRdsManagement.StopRdsClusterAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+                _logger.LogInformation(string.Format(MessageStrings.UserRdsStopSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            }
+            else
+            {
+                var response = await AwsRdsManagement.StopRdsInstanceAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
+                _logger.LogInformation(string.Format(MessageStrings.UserRdsStopSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));
+            }
 
             return RedirectToAction("Index", new { searchtype, query, page = pageNumber, pagesize, sortorder });
         }

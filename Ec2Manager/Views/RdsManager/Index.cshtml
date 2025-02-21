@@ -88,6 +88,9 @@
                 </th>
                 <th>
                 </th>
+                <th>
+                    @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IsCluster)
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -110,9 +113,12 @@
                         @Html.DisplayFor(modelItem => item.Endpoint)
                     </td>
                     <td>
+                        @Html.DisplayFor(modelItem => item.IsCluster)
+                    </td>
+                    <td>
                         @if (@item.Status.Equals("stopped"))
                         {
-                            <a asp-action="Enable" asp-route-id="@item.DbIdentifier" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-action="Enable" asp-route-id="@item.DbIdentifier"  asp-route-account="@item.IsCluster" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
                         }
                         @if (@item.CanReboot && @item.Status.Equals("running"))
                         {
@@ -126,10 +132,10 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
-                                        @using (Html.BeginForm("Reboot", "RdsManager", new { Id = item.DbIdentifier, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
+                                        @using (Html.BeginForm("Reboot", "RdsManager", new { Id = item.DbIdentifier, item.IsCluster, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
                                         {
                                             <div class="modal-body">
-                                                <p>Are you sure you want to reboot Instance: @item.DbIdentifier?</p>
+                                                <p>Are you sure you want to Rds Object: @item.DbIdentifier?</p>
                                                 <p>The User will <b>NOT</b> be made aware of the impending reboot!</p>
                                             </div>
                                             <div class="modal-footer">
@@ -153,10 +159,10 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
-                                        @using (Html.BeginForm("Stop", "RdsManager", new { Id = item.DbIdentifier, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
+                                        @using (Html.BeginForm("Stop", "RdsManager", new { Id = item.DbIdentifier, isCluster = item.IsCluster, account = item.Account, searchtype = Model.SearchType, query = Model.SearchQuery, page = Model.Page, sortorder = Model.SortOrder }, FormMethod.Post))
                                         {
                                             <div class="modal-body">
-                                                <p>Are you sure you want to stop Instance: @item.DbIdentifier?</p>
+                                                <p>Are you sure you want to stop Rds Object: @item.DbIdentifier?</p>
                                                 <p>The User will <b>NOT</b> be made aware of the impending stop!</p>
                                             </div>
                                             <div class="modal-footer">

@@ -37,9 +37,9 @@ namespace Ec2Manager.Workers
         /// <param name="Configuration">The configuration object.</param>
         /// <param name="User">The user requesting the list of instances.</param>
         /// <returns>A list of RDS instances.</returns>
-        internal static async Task<List<RdsInstance>> ListRdsInstancesAsync(IConfiguration Configuration, string User)
+        internal static async Task<List<RdsObject>> ListRdsInstancesAsync(IConfiguration Configuration, string User)
         {
-            List<RdsInstance> rdsInstancesToManage = [];
+            List<RdsObject> rdsInstancesToManage = [];
             IEnumerable<RdsAwsAccountInfo> accounts = LoadRdsAwsAccounts(Configuration);
 
             foreach (RdsAwsAccountInfo accountKey in accounts)
@@ -64,8 +64,19 @@ namespace Ec2Manager.Workers
                         var tag = dbInstance.TagList.SingleOrDefault(t => t.Key == accountKey.TagToSearch);
                         if (tag != null && Regex.Match(tag.Value, accountKey.SearchString).Success)
                         {
-                            RdsInstance rdsInstanceToManage = new(dbInstance.DBInstanceIdentifier, dbInstance.Endpoint.ToString().Replace("rds.amazonaws.com", string.Empty), dbInstance.DBInstanceStatus, accountKey.AccountName);
+                            RdsObject rdsInstanceToManage = new(dbInstance.DBInstanceIdentifier, $"{dbInstance.Endpoint.Address.Replace($".{accountKey.Region}.rds.amazonaws.com", string.Empty)}:{dbInstance.Endpoint.Port}", dbInstance.DBInstanceStatus, accountKey.AccountName, false);
                             rdsInstancesToManage.Add(rdsInstanceToManage);
+                        }
+                    }
+                    var describeResponse2 = await rdsClient.DescribeDBClustersAsync(new DescribeDBClustersRequest());
+
+                    foreach (DBCluster dbCluster in describeResponse2.DBClusters)
+                    {
+                        var tag = dbCluster.TagList.SingleOrDefault(t => t.Key == accountKey.TagToSearch);
+                        if (tag != null && Regex.Match(tag.Value, accountKey.SearchString).Success)
+                        {
+                            RdsObject rdsClusterToManage = new(dbCluster.DBClusterIdentifier, $"{dbCluster.Endpoint.Replace($".{accountKey.Region}.rds.amazonaws.com", string.Empty)}:{dbCluster.Port}", dbCluster.Status, accountKey.AccountName, true);
+                            rdsInstancesToManage.Add(rdsClusterToManage);
                         }
                     }
                 }
@@ -110,6 +121,31 @@ namespace Ec2Manager.Workers
             }
         }
 
+        internal static async Task<StartDBClusterResponse> StartRdsClusterAsync(IConfiguration Configuration, string User, string AccountName, string DbIdentifier)
+        {
+            try
+            {
+                RdsAwsAccountInfo accountKey = LoadRdsAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
+                using AmazonSecurityTokenServiceClient stsClient = new();
+                string sessionName = string.Format(ResourceStrings.StartAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
+                AssumeRoleRequest assumeRoleRequest = new()
+                {
+                    RoleArn = accountKey.RoleArn,
+                    RoleSessionName = sessionName,
+                    DurationSeconds = 900
+                };
+                AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
+                using AmazonRDSClient rdsClient = new(stsResponse.Credentials, RegionEndpoint.GetBySystemName(accountKey.Region));
+                StartDBClusterRequest startRequest = new() { DBClusterIdentifier = DbIdentifier };
+                return await rdsClient.StartDBClusterAsync(startRequest);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.StartRdsInstanceError, DbIdentifier, e.Message), e.InnerException);
+            }
+        }
+
         /// <summary>
         /// Reboots the specified RDS instance.
         /// </summary>
@@ -143,6 +179,31 @@ namespace Ec2Manager.Workers
             }
         }
 
+        internal static async Task<RebootDBClusterResponse> RebootRdsClusterAsync(IConfiguration Configuration, string User, string AccountName, string DbIdentifier)
+        {
+            try
+            {
+                RdsAwsAccountInfo accountKey = LoadRdsAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
+                using AmazonSecurityTokenServiceClient stsClient = new();
+                string sessionName = string.Format(ResourceStrings.RebootAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
+                AssumeRoleRequest assumeRoleRequest = new()
+                {
+                    RoleArn = accountKey.RoleArn,
+                    RoleSessionName = sessionName,
+                    DurationSeconds = 900
+                };
+                AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
+                using AmazonRDSClient rdsClient = new(stsResponse.Credentials, RegionEndpoint.GetBySystemName(accountKey.Region));
+                RebootDBClusterRequest rebootRequest = new() { DBClusterIdentifier = DbIdentifier };
+                return await rdsClient.RebootDBClusterAsync(rebootRequest);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.RebootRdsInstanceError, DbIdentifier, e.Message), e.InnerException);
+            }
+        }
+
         /// <summary>
         /// Stops the specified RDS instance.
         /// </summary>
@@ -167,8 +228,34 @@ namespace Ec2Manager.Workers
                 };
                 AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
                 using AmazonRDSClient rdsClient = new(stsResponse.Credentials, RegionEndpoint.GetBySystemName(accountKey.Region));
-                StopDBInstanceRequest stopRequest = new() { DBInstanceIdentifier = DbIdentifier };
-                return await rdsClient.StopDBInstanceAsync(stopRequest);
+                StopDBInstanceRequest stopInstanceRequest = new() { DBInstanceIdentifier = DbIdentifier };
+                return await rdsClient.StopDBInstanceAsync(stopInstanceRequest);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(ErrorStrings.StopRdsInstanceError, DbIdentifier, e.Message), e.InnerException);
+            }
+        }
+
+        internal static async Task<StopDBClusterResponse> StopRdsClusterAsync(IConfiguration Configuration, string User, string AccountName, string DbIdentifier)
+        {
+            try
+            {
+                RdsAwsAccountInfo accountKey = LoadRdsAwsAccounts(Configuration).SingleOrDefault(x => x.AccountName == AccountName);
+                using AmazonSecurityTokenServiceClient stsClient = new();
+                string sessionName = string.Format(ResourceStrings.StopAction, User, accountKey.AccountName, DateTime.Now.Ticks.ToString());
+                sessionName = sessionName.Length > 63 ? sessionName[..63] : sessionName;
+                AssumeRoleRequest assumeRoleRequest = new()
+                {
+                    RoleArn = accountKey.RoleArn,
+                    RoleSessionName = sessionName,
+                    DurationSeconds = 900
+                };
+                AssumeRoleResponse stsResponse = await stsClient.AssumeRoleAsync(assumeRoleRequest);
+                using AmazonRDSClient rdsClient = new(stsResponse.Credentials, RegionEndpoint.GetBySystemName(accountKey.Region));
+                StopDBClusterRequest stopClusterRequest = new() { DBClusterIdentifier = DbIdentifier };
+                return await rdsClient.StopDBClusterAsync(stopClusterRequest);
+
             }
             catch (Exception e)
             {

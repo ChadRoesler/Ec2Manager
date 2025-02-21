@@ -10,7 +10,7 @@ namespace Ec2Manager.Models.DataManagement
         /// <summary>
         /// Gets or sets the search hits as a paged list of RDS instances.
         /// </summary>
-        public IPagedList<RdsInstance> SearchHits { get; set; }
+        public IPagedList<RdsObject> SearchHits { get; set; }
 
         /// <summary>
         /// Gets or sets the search query.

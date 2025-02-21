@@ -8,10 +8,10 @@ namespace Ec2Manager.Models.DataManagement
 {
     public class RdsSearchService
     {
-        private readonly IEnumerable<RdsInstance> rdsSearchData;
+        private readonly IEnumerable<RdsObject> rdsSearchData;
         private readonly IEnumerable<ClaimValueAccount> claimValueData;
 
-        public RdsSearchService(IEnumerable<RdsInstance> rdsInstances, IEnumerable<ClaimValueAccount> claimValueAccounts)
+        public RdsSearchService(IEnumerable<RdsObject> rdsInstances, IEnumerable<ClaimValueAccount> claimValueAccounts)
         {
             rdsSearchData = rdsInstances;
             claimValueData = claimValueAccounts;
@@ -58,7 +58,7 @@ namespace Ec2Manager.Models.DataManagement
 
             var searchResult = new RdsSearchResult
             {
-                SearchHits = new StaticPagedList<RdsInstance>(searchHitsList.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHitsList.Count),
+                SearchHits = new StaticPagedList<RdsObject>(searchHitsList.Skip((page - 1) * pageSize).Take(pageSize), page, pageSize, searchHitsList.Count),
                 SearchQuery = query,
                 Page = page,
                 SortOrder = sortOrder,
