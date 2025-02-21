@@ -112,7 +112,7 @@
                     <td>
                         @if (@item.Status.Equals("stopped"))
                         {
-                            <a asp-action="Enable" asp-route-id="@item.Name" asp-route-account="@item.Account" asp-route-desiredcapacity="@item.DesiredCapacityValue" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-action="Enable" asp-route-id="@item.Name" asp-route-account="@item.Account" asp-route-desiredcapacity="@item.DesiredCapacityValue" asp-route-maxcapacity="@item.MaxCapacityValue" asp-route-mincapacity="@item.MinCapacityValue" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
                         }
                         @if (@item.CanRefresh && @item.Status.Equals("running"))
                         {
