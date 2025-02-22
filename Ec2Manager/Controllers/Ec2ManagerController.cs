@@ -1,6 +1,6 @@
 ﻿using Ec2Manager.Constants;
 using Ec2Manager.Models.ConfigManagement;
-using Ec2Manager.Models.DataManagement;
+using Ec2Manager.Services;
 using Ec2Manager.Workers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

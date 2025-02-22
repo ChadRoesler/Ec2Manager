@@ -75,18 +75,19 @@
                 <th>
                     @if (Model.SortOrder == "instancecount")
                     {
-                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="instancecount_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().InstanceCount)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
+                        <a asp-action="Index" asp-controller="AsgManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="instancecount">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().InstanceCount)
                         </a>
                     }
                 </th>
                 <th>
+                    @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().CurrentOfTotalCapacity)
                 </th>
             </tr>
         </thead>
@@ -108,6 +109,9 @@
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.InstanceCount)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CurrentOfTotalCapacity)
                     </td>
                     <td>
                         @if (@item.Status.Equals("stopped"))

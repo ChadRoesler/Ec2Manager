@@ -1,5 +1,4 @@
-﻿using Amazon.RDS.Model;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Ec2Manager.Models.DataManagement
 {

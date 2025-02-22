@@ -70,7 +70,7 @@ namespace Ec2Manager.Workers
                             DescribeInstanceRefreshesResponse describeResponseIr = await asgClient.DescribeInstanceRefreshesAsync(describeIrRequest);
                             bool refreshStatus = describeResponseIr.InstanceRefreshes.OrderBy(x => x.StartTime).FirstOrDefault()?.Status == InstanceRefreshStatus.InProgress;
 
-                            AsGroup asGroupToManage = new(group.AutoScalingGroupName, group.Instances.Count, refreshStatus, accountKey.AccountName, desiredCapacity, maxCapacity, minCapacity);
+                            AsGroup asGroupToManage = new(group.AutoScalingGroupName, group.Instances.Count, group.DesiredCapacity, refreshStatus, accountKey.AccountName, desiredCapacity, maxCapacity, minCapacity);
                             asGroupsToManage.Add(asGroupToManage);
                         }
                     }

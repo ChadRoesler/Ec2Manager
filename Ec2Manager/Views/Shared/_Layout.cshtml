@@ -46,125 +46,137 @@
                     </button>
                     <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                         <div id="navbarSearch" class="navbar-search pull-right">
-                            <form class="form-inline my-2 my-lg-0" asp-action="Index" asp-controller="Home">
-                                <select class="form-control mr-sm-2" id="searchtype" name="searchtype">
-                                    @if (ViewData["Title"].ToString() == "Ec2Manager")
+                            @if (ViewData["Title"].ToString() == "Ec2Manager")
+                            {
+                                <form class="form-inline my-2 my-lg-0" asp-action="Index" asp-controller="Ec2Manager">
+                                    <select class="form-control mr-sm-2" id="searchtype" name="searchtype">
+                                    @if (ViewData["SearchType"].ToString() == "name")
                                     {
-                                        @if (ViewData["SearchType"].ToString() == "name")
-                                        {
-                                            <option value="name" selected>Name</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="name">Name</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "status")
-                                        {
-                                            <option value="status" selected>Status</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="status">Status</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "ipaddress")
-                                        {
-                                            <option value="ipaddress" selected>Ip Address</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="ipaddress">Ip Address</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "account")
-                                        {
-                                            <option value="account" selected>Account</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="account">Account</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "id")
-                                        {
-                                            <option value="id" selected>Instance Id</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="id">Instance Id</option>
-                                        }
+                                        <option value="name" selected>Name</option>
                                     }
-                                    else if (ViewData["Title"].ToString() == "RdsManager")
+                                    else
                                     {
-                                        @if (ViewData["SearchType"].ToString() == "dbidentifier")
-                                        {
-                                            <option value="dbidentifier" selected>Name</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="dbidentifier">Name</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "status")
-                                        {
-                                            <option value="status" selected>Status</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="status">Status</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "endpoint")
-                                        {
-                                            <option value="endpoint" selected>Endpoint</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="endpoint">Endpoint</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "account")
-                                        {
-                                            <option value="account" selected>Account</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="account">Account</option>
-                                        }
+                                        <option value="name">Name</option>
                                     }
-                                    else if (ViewData["Title"].ToString() == "AsgManager")
+                                    @if (ViewData["SearchType"].ToString() == "status")
                                     {
-                                        @if (ViewData["SearchType"].ToString() == "name")
-                                        {
-                                            <option value="name" selected>Name</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="name">Name</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "status")
-                                        {
-                                            <option value="status" selected>Status</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="status">Status</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "instancecount")
-                                        {
-                                            <option value="instancecount" selected>Instance Count</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="instancecount">Instance Count</option>
-                                        }
-                                        @if (ViewData["SearchType"].ToString() == "account")
-                                        {
-                                            <option value="account" selected>Account</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="account">Account</option>
-                                        }
+                                        <option value="status" selected>Status</option>
                                     }
-                                </select>
-                                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query" value="@ViewData["SearchQuery"]">
-                                <button class="btn btn-dark my-2 my-sm-0" type="submit">Search</button>
-                            </form>
+                                    else
+                                    {
+                                        <option value="status">Status</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "ipaddress")
+                                    {
+                                        <option value="ipaddress" selected>Ip Address</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="ipaddress">Ip Address</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "account")
+                                    {
+                                        <option value="account" selected>Account</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="account">Account</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "id")
+                                    {
+                                        <option value="id" selected>Instance Id</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="id">Instance Id</option>
+                                    }
+                                    </select>
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query" value="@ViewData["SearchQuery"]">
+                                    <button class="btn btn-dark my-2 my-sm-0" type="submit">Search</button>
+                                </form>
+                            }
+                            else if (ViewData["Title"].ToString() == "RdsManager")
+                            {
+                                <form class="form-inline my-2 my-lg-0" asp-action="Index" asp-controller="RdsManager">
+                                    <select class="form-control mr-sm-2" id="searchtype" name="searchtype">
+                                    @if (ViewData["SearchType"].ToString() == "dbidentifier")
+                                    {
+                                        <option value="dbidentifier" selected>Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="dbidentifier">Name</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "status")
+                                    {
+                                        <option value="status" selected>Status</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="status">Status</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "endpoint")
+                                    {
+                                        <option value="endpoint" selected>Endpoint</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="endpoint">Endpoint</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "account")
+                                    {
+                                        <option value="account" selected>Account</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="account">Account</option>
+                                    }
+                                    </select>
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query" value="@ViewData["SearchQuery"]">
+                                    <button class="btn btn-dark my-2 my-sm-0" type="submit">Search</button>
+                                </form>
+                            }
+                            else if (ViewData["Title"].ToString() == "AsgManager")
+                            {
+                                <form class="form-inline my-2 my-lg-0" asp-action="Index" asp-controller="AsgManager">
+                                    <select class="form-control mr-sm-2" id="searchtype" name="searchtype">
+                                    @if (ViewData["SearchType"].ToString() == "name")
+                                    {
+                                        <option value="name" selected>Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="name">Name</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "status")
+                                    {
+                                        <option value="status" selected>Status</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="status">Status</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "instancecount")
+                                    {
+                                        <option value="instancecount" selected>Instance Count</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="instancecount">Instance Count</option>
+                                    }
+                                    @if (ViewData["SearchType"].ToString() == "account")
+                                    {
+                                        <option value="account" selected>Account</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="account">Account</option>
+                                    }
+                                    </select>
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query" value="@ViewData["SearchQuery"]">
+                                    <button class="btn btn-dark my-2 my-sm-0" type="submit">Search</button>
+                                </form>
+                            }
                         </div>
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
@@ -175,6 +187,10 @@
                                 else if (ViewData["Title"].ToString() == "RdsManager")
                                 {
                                     <a class="nav-link text-dark" asp-area="" asp-controller="RdsManager" asp-action="Index">Refresh List</a>
+                                }
+                                else if (ViewData["Title"].ToString() == "AsgManager")
+                                {
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="AsgManager" asp-action="Index">Refresh List</a>
                                 }
                             </li>
                         </ul>

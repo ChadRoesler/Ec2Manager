@@ -1,10 +1,11 @@
 ﻿using Ec2Manager.Models.ConfigManagement;
+using Ec2Manager.Models.DataManagement;
 using PagedList.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Ec2Manager.Models.DataManagement
+namespace Ec2Manager.Services
 {
     public class RdsSearchService
     {

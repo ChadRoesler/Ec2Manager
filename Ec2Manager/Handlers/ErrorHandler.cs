@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace Ec2Manager.Models
+namespace Ec2Manager.Handlers
 {
     /// <summary>
     /// Middleware to handle errors and log them.

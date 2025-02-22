@@ -1,6 +1,6 @@
 ﻿using Ec2Manager.Constants;
 using Ec2Manager.Models.ConfigManagement;
-using Ec2Manager.Models.DataManagement;
+using Ec2Manager.Services;
 using Ec2Manager.Workers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -68,7 +68,7 @@ namespace Ec2Manager.Controllers
             var search = new RdsSearchService(rdsObjects, claimAccounts);
             _logger.LogInformation(string.Format(MessageStrings.SearchedRdsInstanceCount, rdsObjects.Count, searchtype, query, sortorder));
 
-            RdsSearchResult model = search.GetSearchResult(searchtype, query, pageNumber, 5, sortorder);
+            var model = search.GetSearchResult(searchtype, query, pageNumber, 5, sortorder);
             return View(model);
         }
 
@@ -79,7 +79,7 @@ namespace Ec2Manager.Controllers
             _logger.LogInformation(string.Format(MessageStrings.UserRdsEnable, userClaimPreferredUserNameValue, Id));
 
             var pageNumber = page.GetValueOrDefault(1);
-            if(isCluster)
+            if (isCluster)
             {
                 var response = await AwsRdsManagement.StartRdsClusterAsync(_configuration, userClaimPreferredUserNameValue, account, Id);
                 _logger.LogInformation(string.Format(MessageStrings.UserRdsEnableSuccess, userClaimPreferredUserNameValue, Id, response.HttpStatusCode.ToString()));

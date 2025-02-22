@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Ec2Manager</title>
+    <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -19,19 +19,25 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <img class="img-fluid mr-sm-2" src="~/images/logo.png" height="40" width="40" />
-                <a class="navbar-brand" >Ec2 Manager</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <div id="navbarSearch" class="navbar-search pull-right">
-                       
+                <div class="dropdown ml-2">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img class="img-fluid mr-sm-2" src="~/images/logo.png" height="40" width="40" />
+                        Aws Resource Manager
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item d-flex align-items-center" href="@Url.ActionLink("Index", "Ec2Manager")">
+                            <img src="~/images/ec2_manager.png" height="40" width="40" alt="ec2manager" class="mr-2" />
+                            Ec2 Manager
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="@Url.Action("Index", "AsgManager")">
+                            <img src="~/images/asg_manager.png" height="40" width="40" alt="asgmanager" class="mr-2" />
+                            Asg Manager
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="@Url.ActionLink("Index", "RdsManager")">
+                            <img src="~/images/rds_manager.png" height="40" width="40" alt="rdsmanager" class="mr-2" />
+                            Rds Manager
+                        </a>
                     </div>
-                    <ul class="navbar-nav flex-grow-1">
-                      
-                    </ul>
                 </div>
             </div>
         </nav>
@@ -44,7 +50,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2021 - Chad Roesler
+            &copy; 2025 - Chad Roesler
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

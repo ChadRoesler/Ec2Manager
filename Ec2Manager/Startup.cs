@@ -1,4 +1,4 @@
-using Ec2Manager.Models;
+using Ec2Manager.Handlers;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;

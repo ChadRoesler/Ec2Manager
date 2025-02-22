@@ -75,21 +75,21 @@
                 <th>
                     @if (Model.SortOrder == "endpoint")
                     {
-                        <a asp-action="Index" asp-controller="RdsManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress_desc">
+                        <a asp-action="Index" asp-controller="RdsManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="endpoint_desc">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Endpoint)
                         </a>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-controller="RdsManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="ipaddress">
+                        <a asp-action="Index" asp-controller="RdsManager" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-sortorder="endpoint">
                             @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().Endpoint)
                         </a>
                     }
                 </th>
                 <th>
+                    @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IsCluster)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(Model => Model.SearchHits.FirstOrDefault().IsCluster)
                 </th>
             </tr>
         </thead>

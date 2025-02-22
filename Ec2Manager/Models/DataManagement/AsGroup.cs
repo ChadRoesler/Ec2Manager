@@ -17,12 +17,13 @@ namespace Ec2Manager.Models.DataManagement
         /// <param name="desiredCapacityValue">The desired capacity value of the ASG.</param>
         /// <param name="maxCapacityValue">The maximum capacity value of the ASG.</param>
         /// <param name="minCapacityValue">The minimum capacity value of the ASG.</param>
-        public AsGroup(string name, int instanceCount, bool instanceRefresh, string accountName, int desiredCapacityValue = 0, int maxCapacityValue = 0, int minCapacityValue = 0)
+        public AsGroup(string name, int instanceCount, int currentDesiredCapacity, bool instanceRefresh, string accountName, int desiredCapacityValue = 0, int maxCapacityValue = 0, int minCapacityValue = 0)
         {
             Name = name;
             InstanceCount = instanceCount;
-            Status = instanceRefresh ? "refreshing" : instanceCount > 0 ? "running" : "stopped";
+            Status = instanceRefresh ? "refreshing" : instanceCount > 0 ? "running" : currentDesiredCapacity > 0 ? "starting" : "stopped";
             Account = accountName;
+            CurrentDesiredCapacity = currentDesiredCapacity;
             DesiredCapacityValue = desiredCapacityValue;
             MaxCapacityValue = maxCapacityValue;
             MinCapacityValue = minCapacityValue;
@@ -35,6 +36,7 @@ namespace Ec2Manager.Models.DataManagement
         {
             "stopped" => "images/stopped.png",
             "running" => "images/started.png",
+            "starting" => "images/changing.png",
             "refreshing" => "images/changing.png",
             _ => "images/unknown.png"
         };
@@ -54,6 +56,11 @@ namespace Ec2Manager.Models.DataManagement
         /// </summary>
         [Display(Name = "Instance Count")]
         public int InstanceCount { get; set; }
+
+        public int CurrentDesiredCapacity { get; set; }
+
+        [Display(Name = "Current of Total")]
+        public string CurrentOfTotalCapacity { get { return $"{InstanceCount} of {CurrentDesiredCapacity}"; } }
 
         /// <summary>
         /// Gets or sets the status of the ASG.
