@@ -18,7 +18,7 @@ namespace Ec2Manager.Workers
     /// <summary>
     /// Provides methods for managing AWS RDS instances.
     /// </summary>
-    public static class AwsRdsManagement
+    internal static class AwsRdsManagement
     {
         /// <summary>
         /// Loads the AWS account information for RDS from the configuration.
@@ -39,7 +39,7 @@ namespace Ec2Manager.Workers
         /// <returns>A list of RDS instances.</returns>
         internal static async Task<List<RdsObject>> ListRdsInstancesAsync(IConfiguration Configuration, string User)
         {
-            List<RdsObject> rdsInstancesToManage = [];
+            List<RdsObject> rdsObjectsToManage = [];
             IEnumerable<RdsAwsAccountInfo> accounts = LoadRdsAwsAccounts(Configuration);
 
             foreach (RdsAwsAccountInfo accountKey in accounts)
@@ -65,7 +65,7 @@ namespace Ec2Manager.Workers
                         if (tag != null && Regex.Match(tag.Value, accountKey.SearchString).Success)
                         {
                             RdsObject rdsInstanceToManage = new(dbInstance.DBInstanceIdentifier, $"{dbInstance.Endpoint.Address.Replace($".{accountKey.Region}.rds.amazonaws.com", string.Empty)}:{dbInstance.Endpoint.Port}", dbInstance.DBInstanceStatus, accountKey.AccountName, false);
-                            rdsInstancesToManage.Add(rdsInstanceToManage);
+                            rdsObjectsToManage.Add(rdsInstanceToManage);
                         }
                     }
                     var describeResponse2 = await rdsClient.DescribeDBClustersAsync(new DescribeDBClustersRequest());
@@ -76,7 +76,7 @@ namespace Ec2Manager.Workers
                         if (tag != null && Regex.Match(tag.Value, accountKey.SearchString).Success)
                         {
                             RdsObject rdsClusterToManage = new(dbCluster.DBClusterIdentifier, $"{dbCluster.Endpoint.Replace($".{accountKey.Region}.rds.amazonaws.com", string.Empty)}:{dbCluster.Port}", dbCluster.Status, accountKey.AccountName, true);
-                            rdsInstancesToManage.Add(rdsClusterToManage);
+                            rdsObjectsToManage.Add(rdsClusterToManage);
                         }
                     }
                 }
@@ -85,7 +85,7 @@ namespace Ec2Manager.Workers
                     throw new Exception(string.Format(ErrorStrings.ErrorLoadingAccount, accountKey.AccountName, ex.Message), ex);
                 }
             }
-            return [.. rdsInstancesToManage.OrderBy(x => x.DbIdentifier)];
+            return [.. rdsObjectsToManage.OrderBy(x => x.DbIdentifier)];
         }
 
         /// <summary>

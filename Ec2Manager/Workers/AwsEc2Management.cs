@@ -18,7 +18,7 @@ namespace Ec2Manager.Workers
     /// <summary>
     /// Provides methods for managing AWS EC2 instances.
     /// </summary>
-    public static class AwsEc2Management
+    internal static class AwsEc2Management
     {
         /// <summary>
         /// Loads the AWS account information from the configuration.

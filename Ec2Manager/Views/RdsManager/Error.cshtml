@@ -1,4 +1,6 @@
-﻿@{
+﻿@using Ec2Manager.Views.AsgManager
+@model ErrorModel
+@{
     Layout = "~/Views/Shared/_ErrorLayout.cshtml";
     ViewData["Title"] = "Error";
 }
@@ -9,4 +11,6 @@
 <div>
     <h2 class="text">Something went wrong!</h2>
     <strong>Please try again, if it continues please send a detailed message of whats occuring to your Administrator.</strong>
+    <br />
+    <strong>Error Message: @Model.ErrorMessage</strong>
 </div>

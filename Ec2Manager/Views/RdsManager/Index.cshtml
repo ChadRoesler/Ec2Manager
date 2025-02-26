@@ -118,9 +118,9 @@
                     <td>
                         @if (@item.Status.Equals("stopped"))
                         {
-                            <a asp-action="Enable" asp-route-id="@item.DbIdentifier"  asp-route-account="@item.IsCluster" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
+                            <a asp-action="Enable" asp-route-id="@item.DbIdentifier" asp-route-isCluster="@item.IsCluster" asp-route-account="@item.Account" asp-route-searchtype="@Model.SearchType" asp-route-query="@Model.SearchQuery" asp-route-page="@Model.Page" asp-route-sortorder="@Model.SortOrder" class="btn btn-primary btn-default">Enable</a>
                         }
-                        @if (@item.CanReboot && @item.Status.Equals("running"))
+                        @if (@item.CanReboot && (item.Status.Equals("available") || item.Status.Equals("running")))
                         {
                             <a asp-action="Reboot" class="btn btn-primary btn-warning" data-toggle="modal" data-target="#rebootModal-@item.DbIdentifier">Reboot</a>
                             <div class="modal fade" id="rebootModal-@item.DbIdentifier" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
@@ -147,7 +147,7 @@
                                 </div>
                             </div>
                         }
-                        @if (item.CanStop && item.Status.Equals("running"))
+                        @if (item.CanStop && (item.Status.Equals("available") || item.Status.Equals("running")))
                         {
                             <a asp-action="Stop" class="btn btn-primary btn-danger" data-toggle="modal" data-target="#stopModal-@item.DbIdentifier">Stop</a>
                             <div class="modal fade" id="stopModal-@item.DbIdentifier" tabindex="-1" role="dialog" aria-labelledby="stopModalLabel" aria-hidden="true">

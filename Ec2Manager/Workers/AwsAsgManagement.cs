@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Ec2Manager.Workers
 {
-    public static class AwsAsgManagement
+    internal static class AwsAsgManagement
     {
         /// <summary>
         /// Loads the Auto Scaling Group AWS accounts from the configuration.

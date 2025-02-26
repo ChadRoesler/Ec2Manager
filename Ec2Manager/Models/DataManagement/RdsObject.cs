@@ -30,6 +30,7 @@ namespace Ec2Manager.Models.DataManagement
         {
             "stopped" => "images/stopped.png",
             "running" => "images/started.png",
+            "available" => "images/started.png",
             "initializing" => "images/changing.png",
             "starting" => "images/started.png",
             "stopping" => "images/stopped.png",
